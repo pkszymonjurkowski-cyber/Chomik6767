@@ -369,7 +369,7 @@ kbd{background:rgba(255,255,255,.15);border-radius:5px;padding:1px 7px;font-fami
   <div class="vDot"></div>
   <div id="vPrompt" hidden></div>
   <div id="vBar"></div>
-  <div id="vHudHint">WASD — ruch · Shift — sprint · C — kuca · Spacja — skok · F — podnieś/odłóż gracza / królik · T — ekwipunek · E — dziadek / drzewo / bunker · 1-9,0 — przedmiot · X — kilof · G — ziemia · V — bunker · M — mapa · LPM — uderz/posadź/postaw · ESC — menu</div>
+  <div id="vHudHint">WASD — ruch · Shift — sprint · C — kuca · Spacja — skok · F — podnieś/odłóż gracza / królik · T — ekwipunek · E — dziadek / drzewo / bunker · 1-9,0 — przedmiot · X — kilof · V — bunker · G — wyrzuć · M — mapa · LPM — uderz/posadź/postaw · ESC — menu</div>
 </div>
 <div id="vMapOv" hidden>
   <div id="vMapBox">
@@ -568,8 +568,8 @@ function applyLang(){ // statyczne teksty menu + wioski
   set('#hintLock2',T('WASD chodzi zawsze · ←↑↓→ obracają kamerę bez myszki','WASD always works · ←↑↓→ rotate the camera without a mouse'));
   set('#invTag',T('T — zamknij · wybrany przedmiot trzymasz w ręce','T — close · the selected item is held in your hand'));
   set('#sellTag',T('Ekwipunek — sprzedawać można tylko roślinki:','Inventory — only plants can be sold:'));
-  set('#vHudHint',T('WASD — ruch · Shift — sprint · C — kuca · Spacja — skok · F — podnieś/odłóż gracza / królik · T — ekwipunek · E — dziadek / drzewo / bunker · 1-9,0 — przedmiot · X — kilof · G — ziemia · V — bunker · M — mapa · LPM — uderz/posadź/postaw · ESC — menu',
-    'WASD — move · Shift — sprint · C — crouch · Space — jump · F — pick up/put down player / rabbit · T — inventory · E — hamster / tree / bunker · 1-9,0 — item · X — pickaxe · G — dirt · V — bunker · M — map · LMB — hit/plant/place · ESC — menu'));
+  set('#vHudHint',T('WASD — ruch · Shift — sprint · C — kuca · Spacja — skok · F — podnieś/odłóż gracza / królik · T — ekwipunek · E — dziadek / drzewo / bunker · 1-9,0 — przedmiot · X — kilof · V — bunker · G — wyrzuć · M — mapa · LPM — uderz/posadź/postaw · ESC — menu',
+    'WASD — move · Shift — sprint · C — crouch · Space — jump · F — pick up/put down player / rabbit · T — inventory · E — hamster / tree / bunker · 1-9,0 — item · X — pickaxe · V — bunker · G — drop item · M — map · LMB — hit/plant/place · ESC — menu'));
 }
 const AU={ctx:null,master:null,musicOn:false,musicTimer:null,
 init(){if(this.ctx)return;try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();
@@ -2304,7 +2304,7 @@ addEventListener('keydown',e=>{
       if(p&&p.carriedBy){vnetAct({a:'drop',id:p.carriedBy,by:VNET.myId});return;}}
     if(/^Digit(?:[1-9]|0)$/.test(e.code)){const ix=e.code==='Digit0'?9:+e.code.slice(5)-1;VG.hand=VG.hot[ix]||null;return;} // sloty wg kolejności zdobycia
     if(e.code==='KeyX'&&!e.repeat){VG.hand=VG.hot[10]||null;return;} // slot 11
-    if(e.code==='KeyG'&&!e.repeat){VG.hand=VG.hot[11]||null;return;} // slot 12
+    if(e.code==='KeyG'&&!e.repeat){vDropItem();return;} // 📤 wyrzuć trzymany przedmiot
     if(e.code==='KeyV'&&!e.repeat){VG.hand=VG.hot[12]||null;return;}
     if(e.code==='KeyM'&&!e.repeat){vMapToggle();return;}} // 🗺️ mapa
   if(e.code==='Enter'){
@@ -2553,13 +2553,16 @@ const SEEDS={
   seed5:{n:'🍇 Winogronowe nasiono',en:'🍇 Grape seed',cost:15000,grow:240,ft:70,max:5,out:'plant5',k:1.05,sc:'#c9a6ff',c1:'#4a8f5a',c2:'#5aa86a',c3:'#3d7f5a',fl:'#ffd60a',fr:'#a05ad0'},
   seed6:{n:'💎 Kryształowe nasiono',en:'💎 Crystal seed',cost:25000,grow:360,ft:90,max:5,out:'plant6',k:1.15,sc:'#7ee7ff',c1:'#2e6a75',c2:'#3a8f9a',c3:'#2a5f6a',fl:'#a0f2ff',fr:'#66ffe0'},
   seed7:{n:'🔥 Rubinowe nasiono',en:'🔥 Ruby seed',cost:50000,grow:480,ft:110,max:6,out:'plant7',k:1.2,sc:'#ff3355',c1:'#8f2d3f',c2:'#b53a52',c3:'#7a2637',fl:'#ffb3c1',fr:'#ff3355'},
-  seed8:{n:'🌌 Kosmiczne nasiono',en:'🌌 Cosmic seed',cost:90000,grow:600,ft:130,max:6,out:'plant8',k:1.25,sc:'#8a7dff',c1:'#3a3a8f',c2:'#5a5abf',c3:'#2a2a6f',fl:'#c9d2ff',fr:'#7d6bff'}};
-const SEED_KEYS=['seed1','seed2','seed3','seed4','seed5','seed6','seed7','seed8'];
+  seed8:{n:'🌌 Kosmiczne nasiono',en:'🌌 Cosmic seed',cost:90000,grow:600,ft:130,max:6,out:'plant8',k:1.25,sc:'#8a7dff',c1:'#3a3a8f',c2:'#5a5abf',c3:'#2a2a6f',fl:'#c9d2ff',fr:'#7d6bff'},
+  seed9:{n:'👑 Królewskie nasiono',en:'👑 Royal seed',cost:2000000,grow:720,ft:150,max:6,out:'plant9',k:1.3,sc:'#e8c34a',c1:'#6a4fb0',c2:'#8a6fd0',c3:'#5a3f9f',fl:'#ffd60a',fr:'#ffd700'},
+  seed10:{n:'☄️ Meteorytowe nasiono',en:'☄️ Meteor seed',cost:10000000,grow:900,ft:180,max:6,out:'plant10',k:1.35,sc:'#5a5f6a',c1:'#3a3f4a',c2:'#4a5060',c3:'#2a2f3a',fl:'#ff6a3d',fr:'#ff8c1a'}};
+const SEED_KEYS=['seed1','seed2','seed3','seed4','seed5','seed6','seed7','seed8','seed9','seed10'];
 const BLOCKS=['wood','stone','brick','planks','dirt','bunker','lab'];
 const HOLD=[...SEED_KEYS,...BLOCKS,'pick','sword','workr','wbox','axe','hoe'];
-const ITEMS={plant:{n:'🌿 Roślinka',en:'🌿 Plant',sell:40},plant2:{n:'🌸 Kwiatek',en:'🌸 Flower',sell:110},plant3:{n:'✨ Złota roślinka',en:'✨ Golden plant',sell:260},
-  plant4:{n:'🍓 Truskawka',en:'🍓 Strawberry',sell:800},plant5:{n:'🍇 Winogrona',en:'🍇 Grapes',sell:3000},plant6:{n:'💎 Kryształki',en:'💎 Crystals',sell:7000},
-  plant7:{n:'❤️ Rubiny',en:'❤️ Rubies',sell:15000},plant8:{n:'✴️ Kosmity',en:'✴️ Cosmic orbs',sell:30000},
+const ITEMS={plant:{n:'🌿 Roślinka',en:'🌿 Plant',sell:40,col:'#5cb85c'},plant2:{n:'🌸 Kwiatek',en:'🌸 Flower',sell:110,col:'#e88ab8'},plant3:{n:'✨ Złota roślinka',en:'✨ Golden plant',sell:260,col:'#ffd60a'},
+  plant4:{n:'🍓 Truskawka',en:'🍓 Strawberry',sell:800,col:'#ff5a4a'},plant5:{n:'🍇 Winogrona',en:'🍇 Grapes',sell:3000,col:'#a05ad0'},plant6:{n:'💎 Kryształki',en:'💎 Crystals',sell:7000,col:'#66ffe0'},
+  plant7:{n:'❤️ Rubiny',en:'❤️ Rubies',sell:15000,col:'#ff3355'},plant8:{n:'✴️ Kosmity',en:'✴️ Cosmic orbs',sell:30000,col:'#7d6bff'},
+  plant9:{n:'👑 Korony',en:'👑 Crowns',sell:200000,col:'#ffd700'},plant10:{n:'☄️ Meteory',en:'☄️ Meteors',sell:1000000,col:'#ff8c1a'},
   wood:{n:'🟫 Drewno',en:'🟫 Wood',sell:5,buy:10,col:'#a8703d',noSell:true},
   stone:{n:'⬜ Kamień',en:'⬜ Stone',sell:8,buy:15,col:'#9aa0a6',noSell:true},
   brick:{n:'🟥 Cegła',en:'🟥 Brick',sell:10,buy:20,col:'#b5523b',noSell:true},
@@ -2577,6 +2580,7 @@ const ITEMS={plant:{n:'🌿 Roślinka',en:'🌿 Plant',sell:40},plant2:{n:'🌸 
   hoe:{n:'⚒️ Motyka',en:'⚒️ Hoe',buy:150,hoe:true,col:'#8a8f98',noSell:true},
   asyst:{n:'🧑‍🌾 Asystent',en:'🧑‍🌾 Assistant',buy:20000,assistant:true,noSell:true}};
 for(const k of SEED_KEYS)ITEMS[k]={n:SEEDS[k].n,en:SEEDS[k].en,sell:Math.round(SEEDS[k].cost/2),seed:true,col:SEEDS[k].sc,noSell:true}; // nasionek nie można sprzedawać
+const EAT={plant:30,plant2:60,plant3:90,plant4:150,plant5:240,plant6:300,plant7:400,plant8:9999,plant9:9999,plant10:9999}; // 🍽️ jedzenie owoców — kosmiczne+ = cały pasek
 const iconBg=k=>ITEMS[k].planks?'repeating-linear-gradient(0deg,#d6a05f 0 6px,#a8733a 6px 8px)':ITEMS[k].col;
 const emptyInv=()=>{const o={};for(const k in ITEMS)o[k]=0;return o;};
 const UPG={speed:{n:'👟 Szybkie łapki',en:'👟 Fast paws',d:'+12% prędkości chodu',enD:'+12% walk speed',max:3,cost:[150,300,450]},
@@ -2596,12 +2600,15 @@ function vTerrainH(x,z){ // falowany teren: wzgórza i doliny, płasko przy targ
 const VG={on:false,v:null,p:null,money:100,inv:emptyInv(),hot:[],up:{speed:0,fert:0,price:0,map:0,bunk:0,work:0,hunger:0},blocks:[],bunkers:[],labs:[],plants:[],elder:null,
   gui:false,tab:'buy',bt:'seeds',it:'seeds',sel:null,hand:null,handKey:'',handG:null,ghost:null,ring:null,barKey:'',saveT:0,prompt:'',hpKey:-1,punchT:0,swingT:0,pawsG:null,
   mapOwned:false,mapOpen:false,exGrid:null,exCv:null,exDirty:true,exAcc:0,hgKey:-1,hungWarn:false,boxHintT:0,
-  boxes:[],workAsg:[],wmarkG:null,choppedTrees:[],axeMsgT:0,axeMsgHp:0,hasAssist:false,assistG:null,assistTag:null};
+  boxes:[],workAsg:[],wmarkG:null,choppedTrees:[],axeMsgT:0,axeMsgHp:0,hasAssist:false,assistG:null,assistTag:null,
+  fruits:{},drops:[],dropIdc:0};
 const HUN={v:367,max:367}; // 🍗 pasek głodu: pełny → 0 zajmuje 6 min 7 s (367 s); sprint 2× szybciej
 const EXCS=4,EXN=55,EXO=27; // siatka eksploracji mapy (komórka 4, pokrywa ±110)
 const VRAY=new THREE.Raycaster();
 const itemPrice=k=>Math.round(ITEMS[k].sell*(1+.2*VG.up.price));
-const fmtK=n=>{n=Math.round(n);if(n<1000)return String(n);const v=n/1000;return (n%1000?String(Math.round(v*10)/10):String(Math.round(v)))+'K';};
+const fmtK=n=>{n=Math.round(n);if(n<1000)return String(n);
+  if(n>=1e6){const v=n/1e6;return (n%1e6?String(Math.round(v*10)/10):String(Math.round(v)))+'M';}
+  const v=n/1000;return (n%1000?String(Math.round(v*10)/10):String(Math.round(v)))+'K';};
 function vMoneyDelta(d){ // wspólny portfel wioski — każda zmiana roześłana graczom
   if(!d)return;VG.money=Math.max(0,Math.round(VG.money+d));
   if(d>0)AU.coin();else AU.spend();
@@ -2776,6 +2783,13 @@ function vPlantVisual(pl){
     }else if(pl.k==='seed7'){ // 🔥 rubin + mniejszy
       const s1=cyl(.01,.07,.18,'#ff3355',4);s1.position.y=.2;pl.body.add(s1);
       const s2=cyl(.008,.05,.12,'#ff8aa5',4);s2.position.set(-.06,.14,0);s2.rotation.z=.3;pl.body.add(s2);
+    }else if(pl.k==='seed9'){ // 👑 mini korona
+      const s1=cyl(.05,.06,.05,'#e8c34a',8);s1.position.y=.17;pl.body.add(s1);
+      for(let i=0;i<4;i++){const sp=cyl(.008,.02,.09,'#ffd700',4);
+        sp.position.set(Math.cos(i*1.57)*.045,.25,Math.sin(i*1.57)*.045);pl.body.add(sp);}
+    }else if(pl.k==='seed10'){ // ☄️ meteoryt — szara bryła z żarem
+      const s1=sph(.07,'#3a3f4a');s1.scale.set(1.15,.9,1);s1.position.y=.16;pl.body.add(s1);
+      const s2=sph(.03,'#ff6a3d');s2.position.set(.04,.17,.05);pl.body.add(s2);
     }else{ // 🌌 kosmiczne — świecąca kulka z drobinami wokół
       const s1=sph(.07,'#8a7dff');s1.position.y=.18;pl.body.add(s1);
       const s2=sph(.026,'#c9d2ff');s2.position.set(.08,.25,0);pl.body.add(s2);
@@ -2843,6 +2857,25 @@ function vPlantVisual(pl){
       const slots=[[.22,.5,.18],[-.2,.46,.14],[.06,.4,-.24],[-.14,.68,-.1],[.2,.74,-.06],[0,.9,.14]];
       for(let i=0;i<sd.max;i++){const fr=sph(.07,'#7d6bff');fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=1.5;
+    }else if(pl.k==='seed9'){ // królewski krzak — purpura ze złotą koroną
+      const mnd=cyl(.34,.44,.18,'#3a2a5a',10);mnd.position.y=.09;pl.body.add(mnd);
+      const st=cyl(.05,.06,.7,'#6a4fb0',6);st.position.y=.45;pl.body.add(st);
+      const b1=sph(.3,'#8a6fd0');b1.scale.y=.8;b1.position.y=.75;pl.body.add(b1);
+      const cr=cyl(.14,.2,.1,'#ffd700',8);cr.position.y=1.12;pl.body.add(cr); // złota korona
+      for(let i=0;i<5;i++){const sp=cyl(.01,.035,.14,'#ffd700',4);
+        sp.position.set(Math.cos(i*1.256)*.17,1.24,Math.sin(i*1.256)*.17);pl.body.add(sp);}
+      const slots=[[.24,.6,.18],[-.22,.56,.14],[.08,.5,-.24],[-.14,.74,-.1],[.2,.8,-.06],[0,.44,.16]];
+      for(let i=0;i<sd.max;i++){const fr=sph(.08,'#ffd700');fr.scale.set(1,1.2,1);fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
+      pl.lab.position.y=1.5;
+    }else if(pl.k==='seed10'){ // meteorowy krzak — ciemna skała z żarem
+      const mnd=cyl(.36,.46,.18,'#22262e',10);mnd.position.y=.09;pl.body.add(mnd);
+      const st=cyl(.06,.08,.8,'#3a3f4a',6);st.position.y=.5;pl.body.add(st);
+      const b1=sph(.34,'#4a5060');b1.scale.y=.85;b1.position.y=.85;pl.body.add(b1);
+      for(let i=0;i<3;i++){const cr=cyl(.02,.05,.2,'#ff6a3d',5);
+        cr.position.set(Math.cos(i*2.1)*.2,.75,Math.sin(i*2.1)*.2);cr.rotation.x=(i%2?.5:-.5);pl.body.add(cr);} // żar w pęknięciach
+      const slots=[[.26,.62,.2],[-.24,.58,.16],[.1,.52,-.26],[-.16,.8,-.12],[.22,.86,-.08],[0,.98,.14]];
+      for(let i=0;i<sd.max;i++){const fr=sph(.075,'#ff8c1a');fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
+      pl.lab.position.y=1.55;
     }else{ // kryształowa roślina
       const mnd=cyl(.3,.4,.16,'#3a4a55',10);mnd.position.y=.08;pl.body.add(mnd);
       const st=cyl(.04,.05,.6,'#3a8f9a',6);st.position.y=.38;pl.body.add(st);
@@ -2863,7 +2896,7 @@ function saveVillage(){if(!VG.v)return;
   try{if(VNET.on&&!VNET.isHost){ // gość: zapisuje tylko swój ekwipunek (świat jest u hosta)
       localStorage.setItem(vSaveKey()+'_g',JSON.stringify({m:VG.money,inv:VG.inv,up:VG.up,
         mo:VG.mapOwned?1:0,ex:VG.exGrid?Array.from(VG.exGrid):null,hg:Math.round(HUN.v),
-        wa:VG.workAsg.map(a=>[round2(a.x),round2(a.z)])}));return;}
+        wa:VG.workAsg.map(a=>[round2(a.x),round2(a.z)]),fr:VG.fruits}));return;}
     localStorage.setItem(vSaveKey(),JSON.stringify({m:VG.money,inv:VG.inv,up:VG.up,
       dy:VG.day,dtm:Math.round(VG.dayT),
       bl:VG.blocks.map(b=>({x:b.x,y:b.y,z:b.z,t:b.t})),
@@ -2871,7 +2904,7 @@ function saveVillage(){if(!VG.v)return;
       lb:VG.labs.map(l=>[round2(l.x),round2(l.y),round2(l.z)]),
       hot:VG.hot.join(','),
       mo:VG.mapOwned?1:0,ex:VG.exGrid?Array.from(VG.exGrid):null,hg:Math.round(HUN.v),
-      tc:VG.choppedTrees,as:VG.hasAssist?1:0,
+      tc:VG.choppedTrees,as:VG.hasAssist?1:0,fr:VG.fruits,
       bx:VG.boxes.map(b=>({x:round2(b.x),y:round2(b.y),z:round2(b.z),in:b.inB?1:0,c:b.cnt})),
       wa:VG.workAsg.map(a=>[round2(a.x),round2(a.z)]),
       pl:VG.plants.map(p=>({x:p.x,z:p.z,k:p.k,st:p.st,t:p.t,tm:p.tm,f:p.f,b:p.inB?1:0,h:p.hp,d:Math.round(p.dmgT)}))}));}catch(e){}}
@@ -2881,7 +2914,7 @@ function enterVillage(v){
   VG.v=v;VG.on=true;VG.gui=false;VG.tab='buy';VG.bt='seeds';VG.it='seeds';VG.sel=null;VG.hand=null;VG.handKey='';
   VG.plants=[];VG.blocks=[];VG.labs=[];VG.money=100;VG.inv=emptyInv();VG.hot=[];VG.up={speed:0,fert:0,price:0,map:0,bunk:0,work:0,hunger:0};VG.saveT=0;VG.barKey='';
   VG.boxes=[];VG.workAsg=[];VG.wmarkG=null;VRK.vis=false;VRK.carry={};VRK.carryN=0;VRK.inB=false;VRK.hb=null;VG.choppedTrees=[];
-  VG.hasAssist=false;VG.assistG=null;VG.assistTag=null;
+  VG.hasAssist=false;VG.assistG=null;VG.assistTag=null;VG.fruits={};VG.drops=[];VG.dropIdc=0;
   VG.mapOwned=false;VG.mapOpen=false;show($('#vMapOv'),false);VG.exGrid=null;VG.exDirty=true;
   HUN.v=HUN.max;VG.hungWarn=false;VG.boxHintT=0;
   VG.dayT=0;VG.day=1;VG.phase='day';VG.park=false;VG.inside=false;
@@ -2906,7 +2939,7 @@ function enterVillage(v){
   const rg=new THREE.RingGeometry(.3,.42,28);rg.rotateX(-Math.PI/2);
   const rm=new THREE.Mesh(rg,new THREE.MeshBasicMaterial({color:0x66ff88,transparent:true,opacity:.9,side:THREE.DoubleSide,depthWrite:false}));
   rm.material.userData.worldOwned=true;rm.visible=false;rm.position.y=.04;W.group.add(rm);VG.ring=rm;
-  if(VG.inv.sword>0)vSwordHide();
+  if(VG.inv.sword>0)VG.handKey='###'; // miecz w ręce po wejściu
   for(const a of RAID.aliens)a.mesh=null; // stare modele kosmitów — przebuduj w nowym świecie
   vAlienBuildAll();
   if(sv){
@@ -2930,6 +2963,7 @@ function enterVillage(v){
     if(Array.isArray(P.tc))for(const q of P.tc){if(!Array.isArray(q))continue;
       vRemoveTreeAt(+q[0]||0,+q[1]||0);VG.choppedTrees.push([+q[0]||0,+q[1]||0]);}
     if(P.as)VG.hasAssist=true;
+    if(P.fr&&typeof P.fr==='object')for(const k in P.fr)if(typeof P.fr[k]==='number')VG.fruits[k]=P.fr[k]; // 🤝 wspólna pula owoców od hosta
     if(typeof P.hot==='string'&&P.hot)VG.hot=P.hot.split(',').filter(k=>HOLD.includes(k));
     if(Array.isArray(P.pl))for(const q of P.pl){const k=SEEDS[q.k]?q.k:'seed1',sd=SEEDS[k];
       vNewPlant(q.x,q.z,k,q.st==='bush'?'bush':'seed',+q.t||0,+q.tm||sd.ft,Math.min(sd.max,+q.f||0),q.b===1);}
@@ -2954,7 +2988,7 @@ function exitVillage(){
   if(document.pointerLockElement)document.exitPointerLock();
   VG.on=false;VG.v=null;VG.p=null;VG.plants=[];VG.blocks=[];VG.elder=null;VG.ghost=null;VG.ring=null;
   VG.boxes=[];VG.workAsg=[];VG.wmarkG=null;VRK.vis=false;VRK.carry={};VRK.carryN=0;VRK.inB=false;VRK.hb=null;
-  VG.hasAssist=false;VG.assistG=null;VG.assistTag=null;
+  VG.hasAssist=false;VG.assistG=null;VG.assistTag=null;VG.fruits={};VG.drops=[];VG.dropIdc=0;
   VG.mapOpen=false;show($('#vMapOv'),false);
   if(VG.handG){while(VG.handG.children.length)VG.handG.remove(VG.handG.children[0]);VG.handG.visible=false;}
   $('#vDay').className='';
@@ -3012,7 +3046,7 @@ function vnetHostData(c,d){if(!d||typeof d!=='object')return;
         lb:VG.labs.map(l=>[round2(l.x),round2(l.y),round2(l.z)]),
         bx:VG.boxes.map(b=>({x:round2(b.x),y:round2(b.y),z:round2(b.z),in:b.inB?1:0,c:b.cnt})),
         tc:VG.choppedTrees,
-        as:VG.hasAssist?1:0,
+        as:VG.hasAssist?1:0,fr:VG.fruits,
         sw:VG.inv.sword>0?1:0,
         dy:VG.day,dtm:Math.round(VG.dayT),
         pl:VG.plants.map(p=>({x:p.x,z:p.z,k:p.k,st:p.st,t:p.t,tm:p.tm,f:p.f,b:p.inB?1:0,h:p.hp,d:Math.round(p.dmgT)}))});}catch(e){}
@@ -3061,7 +3095,7 @@ function vnetClientData(d){if(!d||typeof d!=='object')return;
     VNET.players={};for(const p of(d.players||[]))VNET.players[p.id]={id:p.id,nick:p.nick,color:p.color,x:0,y:0,z:6,yaw:0};
     showNet('');
     const v={id:d.vid,name:d.name||('Wioska '+VNET.code),multi:true,code:VNET.code};
-    VNET.pending={bl:d.bl||[],bk:d.bk||[],lb:d.lb||[],bx:d.bx||[],tc:d.tc||[],pl:d.pl||[],mapLv:d.mapLv,sw:d.sw,as:d.as,dy:d.dy,dtm:d.dtm,hot:VG.hot.join(',')};
+    VNET.pending={bl:d.bl||[],bk:d.bk||[],lb:d.lb||[],bx:d.bx||[],tc:d.tc||[],pl:d.pl||[],mapLv:d.mapLv,sw:d.sw,as:d.as,fr:d.fr||{},dy:d.dy,dtm:d.dtm,hot:VG.hot.join(',')};
     toast('🏘️ '+T('Dołączono do wioski','Joined village')+' „'+esc(v.name)+'"','good');
     enterVillage(v);
     VG.money=Math.max(0,Math.round(+d.m||0)); // wspólny portfel od hosta
@@ -3145,6 +3179,16 @@ function handleVillMsg(ev){if(!ev||!ev.a)return;
     case 'boxDel':{if(!VG.on)break;const b=VG.boxes.find(b=>Math.abs(b.x-ev.x)<.3&&Math.abs(b.z-ev.z)<.3&&b.inB===!!ev.in);if(b)vRemoveBox(b);break;}
     case 'boxSet':{if(!VG.on)break;const b=VG.boxes.find(b=>Math.abs(b.x-ev.x)<.3&&Math.abs(b.z-ev.z)<.3&&b.inB===!!ev.in);
       if(b){b.cnt=(ev.c&&typeof ev.c==='object')?ev.c:{};vBoxLabel(b);}break;}
+    case 'fruitGet':{if(VG.on&&VNET.on&&ev.by!==VNET.myId&&ev.c&&typeof ev.c==='object') // 🤝 wspólne owoce — ktoś zebrał
+      for(const k in ev.c)VG.fruits[k]=(VG.fruits[k]||0)+ev.c[k];break;}
+    case 'fruitEat':{if(VG.on&&VNET.on&&ev.by!==VNET.myId&&ev.k)VG.fruits[ev.k]=Math.max(0,(VG.fruits[ev.k]||0)-1);break;}
+    case 'dropAdd':{if(!VG.on||!W)break;
+      if(VG.drops.some(d=>d.id===ev.id))break;
+      const mesh=blockMesh(ev.k,.45);mesh.position.set(+ev.x||0,+ev.y||0,+ev.z||0);mesh.castShadow=true;
+      W.group.add(mesh);
+      VG.drops.push({id:ev.id,x:+ev.x||0,z:+ev.z||0,y:+ev.y||0,k:ev.k,mesh});break;}
+    case 'dropGet':{if(!VG.on)break;const d=VG.drops.find(d=>d.id===ev.id);
+      if(d){W.group.remove(d.mesh);VG.drops.splice(VG.drops.indexOf(d),1);}break;}
     case 'plantDmg':{if(!VG.on)break;const pl=VG.plants.find(p=>Math.abs(p.x-ev.x)<.3&&Math.abs(p.z-ev.z)<.3);
       if(!pl)break;pl.hp=ev.hp;
       if(pl.hp<=0){vRemovePlant(pl);toast('👽 '+T('Kosmici zniszczyli roślinę!','Aliens destroyed a plant!'),'bad');}
@@ -3163,7 +3207,7 @@ function handleVillMsg(ev){if(!ev||!ev.a)return;
     case 'bunkerDel':{if(!VG.on)break;const b=VG.bunkers.find(b=>b.x===ev.x&&b.z===ev.z);if(b)vRemoveBunker(b);break;}
     case 'bunkerResize':{if(!VG.on)break;for(const b of VG.bunkers)vResizeBunker(b,ev.s||bunkerSize());vBuildInterior(W);break;}
     case 'asystAdd':{if(VG.on){VG.hasAssist=true;vAssistSpawn();}break;}
-    case 'swordTake':{if(W&&W.swordMesh)W.swordMesh.visible=false;
+    case 'swordTake':{ // miecz zostaje w świecie — każdy gracz może go podnieść
       if(ev.by!==VNET.myId)toast('⚔️ '+vNickOf(ev.by)+' '+T('zdobył miecz!','got the sword!'),'good');break;}}}
 function vElderDist(){const p=VG.p,e=VG.elder;return(p&&e)?Math.hypot(p.x-e.position.x,p.z-e.position.z):99;}
 function villageE(){if(vElderDist()<3.8)openShop();else toast('🧓 '+T('Podejdź do starego chomika i naciśnij E','Walk up to the old hamster and press E'));}
@@ -3188,10 +3232,14 @@ function villageEAction(){ // E: drzewo/parkour, wyjścia, dziadek
         const bonus=vDirtAt(pl.x,pl.z)?Math.round(pl.f*itemPrice(sd2.out)*.1):0;
         if(bonus)vMoneyDelta(bonus);
         AU.coin();
-        VG.inv[sd2.out]=(VG.inv[sd2.out]||0)+pl.f;toast('+'+pl.f+' '+iN(ITEMS[sd2.out])+(bonus?' +$'+fmtK(bonus):''),'good');pl.f=0;saveVillage();
+        vFruitAdd(sd2.out,pl.f);toast('+'+pl.f+' '+iN(ITEMS[sd2.out])+(bonus?' +$'+fmtK(bonus):'')+(VNET.on?' ('+T('wspólne','shared')+')':''),'good');pl.f=0;saveVillage();
         vnetAct({a:'fruit',x:pl.x,z:pl.z,f:0});
+        if(VNET.on)vnetAct({a:'fruitGet',c:{[sd2.out]:pl.f}});
         if(VG.gui==='inv')renderInv();else if(VG.gui)renderShop();
         return;}}
+    if(vNearBox()){toast('📦 '+T('Skrzynka jest pusta','The crate is empty'));return;}
+    {const pl=VG.plants.find(q=>q.inB&&!q.dmgT&&Math.hypot(q.x-p.x,q.z-p.z)<2.2);
+     if(pl){toast('🌿 '+T('Ta roślinka nie ma jeszcze owoców','This plant has no fruit yet'));return;}}
     // 🧑‍🌾 asystent — sklep jak u dziadka
     if(VG.assistG&&Math.hypot(p.x-VG.assistG.position.x,p.z-VG.assistG.position.z)<3.8){openShop();return;}
     if(W&&W.bunkerExit&&p.bunkerFrom&&Math.hypot(p.x-W.bunkerExit.x,p.z-W.bunkerExit.z)<2){
@@ -3202,17 +3250,27 @@ function villageEAction(){ // E: drzewo/parkour, wyjścia, dziadek
     p.park=true;p.x=W.pkExit.x;p.z=W.pkExit.z;p.y=W.pkExit.y+.6;p.vy=0;p.vx=p.vz=0;
     toast('🌲 '+T('Bunker z mieczem — przejdź parkour po karcie!','Bunker with the sword — do the parkour for the card!'));return;}
   const b=vNearHatch();
-  if(b){p.bunkerFrom={x:b.hatch.x+.9,y:b.h+1.25,z:b.hatch.z+.9};p.inside=true;
+  if(b){p.bunkerFrom={x:b.hatch.x+.9,y:b.h+1.15,z:b.hatch.z+.9};p.inside=true;
     p.x=0;p.z=4;p.y=BKY;p.vx=p.vz=p.vy=0;
     toast('🚪 '+T('Wszedłeś do swojego bunkra','You entered your bunker'),'good');return;}
   // 🥕 marchewki (E) — +20 s głodu
   if(!p.park&&W&&W.carrots){let best=null,bd=1.5;
     for(const c of W.carrots){if(!c.mesh.visible)continue;
-      const d=Math.hypot(c.x-p.x,c.z-p.z);if(d<bd){bd=d;best=c;}}
+      const d=Math.hypot(c.x-p.x,c.z-p.z);if(d<bd&&Math.abs(p.y-vTerrainH(c.x,c.z))<3){bd=d;best=c;}}
     if(best){best.mesh.visible=false;best.t=100; // wraca po 100 s (bez widocznego timera)
       const before=HUN.v;HUN.v=Math.min(HUN.max,HUN.v+20);VG.hungWarn=false;
       AU.coin();toast('🥕 +'+Math.round(HUN.v-before)+'s '+T('głodu','hunger'),'good');
       vnetAct({a:'carrotPick',x:round2(best.x),z:round2(best.z)});return;}}
+  // 📤 podnoszenie wyrzuconych przedmiotów (E)
+  if(W&&VG.drops.length){let best=null,bd=1.8;
+    for(const d of VG.drops){const d2=Math.hypot(d.x-p.x,d.z-p.z);
+      if(d2<bd&&Math.abs(p.y-d.y)<2.5){bd=d2;best=d;}}
+    if(best){VG.inv[best.k]=(VG.inv[best.k]||0)+1;AU.coin();
+      toast('✋ +1 '+iN(ITEMS[best.k]),'good');
+      W.group.remove(best.mesh);VG.drops.splice(VG.drops.indexOf(best),1);
+      saveVillage();if(VG.gui==='inv')renderInv();
+      vnetAct({a:'dropGet',id:best.id});
+      return;}}
   // 📦 opróżnianie skrzynki (E)
   if(vBoxCollect())return;
   // zrywanie dzikich kwiatków (E) — 🌸 Kwiatek do craftingu
@@ -3230,10 +3288,13 @@ function villageEAction(){ // E: drzewo/parkour, wyjścia, dziadek
       const bonus=vDirtAt(pl.x,pl.z)?Math.round(pl.f*itemPrice(sd2.out)*.1):0; // lepsza ziemia: +10% wartości
       if(bonus)vMoneyDelta(bonus);
       AU.coin();
-      VG.inv[sd2.out]=(VG.inv[sd2.out]||0)+pl.f;toast('+'+pl.f+' '+iN(ITEMS[sd2.out])+(bonus?' +$'+fmtK(bonus):''),'good');pl.f=0;saveVillage();
+      vFruitAdd(sd2.out,pl.f);toast('+'+pl.f+' '+iN(ITEMS[sd2.out])+(bonus?' +$'+fmtK(bonus):'')+(VNET.on?' ('+T('wspólne','shared')+')':''),'good');pl.f=0;saveVillage();
       vnetAct({a:'fruit',x:pl.x,z:pl.z,f:0});
+      if(VNET.on)vnetAct({a:'fruitGet',c:{[sd2.out]:pl.f}});
       if(VG.gui==='inv')renderInv();else if(VG.gui)renderShop();
       return;}}
+  const hk=VG.hand; // 🍽️ zjedz owoc trzymany w ręce (E)
+  if(hk&&EAT[hk]&&(VG.inv[hk]||0)>0){vEatFruit(hk);return;}
   if(vElderDist()<3.8){openShop();return;} // dziadek ma priorytet
   if(VG.bunkers.some(bb=>Math.hypot(p.x-(bb.x+bb.size/2),p.z-(bb.z+bb.size/2))<bb.size/2+2)){ // przy bunkerze, nie przy klapie
     toast('🚪 '+T('Wejdź przy CZARNEJ klapie w rogu platformy i kliknij E','Go to the BLACK hatch at the platform corner and press E'));return;}
@@ -3307,34 +3368,48 @@ function renderShop(){
       'Building: pick a block in the inventory (F) or with keys 1-9,0, LMB places · ⛏️ pickaxe (X) in hand: LMB/RMB destroys blocks')+'</div>';
   }
   $('#buyList').innerHTML=h;
-  if(VG.sel&&!(VG.inv[VG.sel]>0))VG.sel=null;
+  if(VG.sel&&!(vFruitTotal(VG.sel)>0))VG.sel=null;
   if(VG.sel&&(ITEMS[VG.sel].noSell||ITEMS[VG.sel].tool))VG.sel=null;
-  const items=Object.keys(ITEMS).filter(k=>!ITEMS[k].tool&&!ITEMS[k].noSell&&(VG.inv[k]||0)>0); // tylko roślinki i nasiona
-  $('#invList').innerHTML=items.length?items.map(k=>'<div class="shRow'+(VG.sel===k?' sel':'')+'" data-k="'+k+'"><div class="shn">'+iN(ITEMS[k])+'<small>$'+fmtK(itemPrice(k))+T(' za sztukę',' per piece')+'</small></div><b>×'+VG.inv[k]+'</b></div>').join('')
-    :'<div class="tag" style="margin:12px 0">'+T('Ekwipunek pusty — sprzedawać można tylko roślinki','Inventory empty — only plants can be sold')+'</div>';
+  const items=Object.keys(ITEMS).filter(k=>!ITEMS[k].tool&&!ITEMS[k].noSell&&vFruitTotal(k)>0); // tylko roślinki (w MP też ze wspólnej puli)
+  $('#invList').innerHTML=items.length?items.map(k=>'<div class="shRow'+(VG.sel===k?' sel':'')+'" data-k="'+k+'"><div class="shn">'+iN(ITEMS[k])+'<small>$'+fmtK(itemPrice(k))+T(' za sztukę',' per piece')+(VNET.on?' · '+T('wspólne','shared'):'')+'</small></div><b>×'+vFruitTotal(k)+'</b></div>').join('')
+    :'<div class="tag" style="margin:12px 0">'+T('Brak owoców — sprzedawać można tylko roślinki','No fruits — only plants can be sold')+'</div>';
   $('#sellOne').disabled=!VG.sel;$('#sellAll').disabled=!items.length;}
 function renderInv(){
   $('#invMoney').textContent='$'+fmtK(VG.money);
   document.querySelectorAll('#invOv [data-it]').forEach(b=>b.classList.toggle('sel',b.dataset.it===VG.it));
-  const keys=VG.it==='seeds'?SEED_KEYS:(VG.it==='blocks'?[...BLOCKS,'pick','axe','hoe']:(VG.it==='workers'?['workr','wbox']:['plant','plant2','plant3','plant4','plant5','plant6','plant7','plant8']));
+  const keys=VG.it==='seeds'?SEED_KEYS:(VG.it==='blocks'?[...BLOCKS,'pick','axe','hoe']:(VG.it==='workers'?['workr','wbox']:['plant','plant2','plant3','plant4','plant5','plant6','plant7','plant8','plant9','plant10']));
   let h='';
-  for(const k of keys){const it=ITEMS[k],n=VG.inv[k]||0,holdable=!!(it.seed||it.col);
+  for(const k of keys){const it=ITEMS[k];let n=VG.inv[k]||0;
+    if(EAT[k]&&VNET.on)n=vFruitTotal(k); // 🤝 w MP owoce liczone ze wspólnej puli
+    const holdable=!!(it.seed||it.col)&&!(EAT[k]&&VNET.on);
     const sub=it.seed?seedInfo(k):(it.tool?T('narzędzie — niszczy postawione bloki (LPM/PPM)','tool — destroys placed blocks (LMB/RMB)'):
       (it.worker?T('LPM zaznacza roślinkę dla pracownika — zbiera owoce i znosi je do skrzynki','LMB marks a plant for the worker — it harvests fruits and delivers them to the crate'):
       (it.box?T('postaw na trawie lub w bunkerze (LPM) — E odbiera zebrane owoce','place on grass or in the bunker (LMB) — press E to collect the harvested fruits'):
-      (holdable?T('blok do budowania','block for building'):'$'+fmtK(itemPrice(k))+T(' za sztukę (sprzedaj u dziadka)',' per piece (sell to the old hamster)')))));
+      (EAT[k]?(VNET.on?T('wspólny zapas — każdy może jeść i sprzedawać','shared stock — anyone can eat and sell')+' · 🍽️ +'+(EAT[k]>=HUN.max?T('cały pasek','full bar'):EAT[k]+'s'):
+        T('trzymaj w ręce i kliknij E, żeby zjeść (🍽️ +','hold in hand and press E to eat (🍽️ +')+(EAT[k]>=HUN.max?T('cały pasek','full bar'):EAT[k]+'s)')+' · $'+fmtK(itemPrice(k))):
+      (holdable?T('blok do budowania','block for building'):'$'+fmtK(itemPrice(k))+T(' za sztukę (sprzedaj u dziadka)',' per piece (sell to the old hamster)'))))));
     h+='<div class="shRow'+(VG.hand===k?' sel':'')+(n?'':' dimr')+'"><div class="shn">'+iN(it)+'<small>'+sub+'</small></div><b>×'+n+'</b>'+
-      (holdable?'<button class="btn sm calm" data-hold="'+k+'"'+(n?'':' disabled')+'>'+(VG.hand===k?T('✔ W RĘCE','✔ IN HAND'):T('WEŹ','TAKE'))+'</button>':'')+'</div>';}
+      (holdable?'<button class="btn sm calm" data-hold="'+k+'"'+(n?'':' disabled')+'>'+(VG.hand===k?T('✔ W RĘCE','✔ IN HAND'):T('WEŹ','TAKE'))+'</button>':'')+
+      (EAT[k]?'<button class="btn sm calm" data-eat="'+k+'"'+(n>0?'':' disabled')+' style="margin-left:6px">🍽️ '+T('ZJEDZ','EAT')+'</button>':'')+'</div>';}
   $('#invGrid').innerHTML=h;}
-function vSell(all){const k=VG.sel;if(!k)return;const n=VG.inv[k]||0;if(n<=0)return;
-  const c=all?n:1,pr=itemPrice(k);VG.inv[k]-=c;vMoneyDelta(c*pr);AU.pass();
-  toast('💰 '+T('Sprzedano ','Sold ')+c+'× '+iN(ITEMS[k])+' (+$'+fmtK(c*pr)+')','good');saveVillage();renderShop();}
-function vSellAll(){ // SELL ALL: sprzedaje wszystkie nasionka i wszystkie rodzaje roślinek
+function vSell(){ // SELL: 1 sztuka wybranego owocu (w MP ze wspólnej puli)
+  const k=VG.sel;if(!k)return;const total=vFruitTotal(k);if(total<=0)return;
+  let took='';
+  if(VNET.on){if(VG.fruits[k]>0){VG.fruits[k]--;took=T('wspólnej puli','shared pool');}
+    else if(VG.inv[k]>0){VG.inv[k]--;took=T('ekwipunku','inventory');}else return;}
+  else{if(!(VG.inv[k]>0))return;VG.inv[k]--;}
+  const pr=itemPrice(k);vMoneyDelta(pr);AU.pass();
+  toast('💰 '+T('Sprzedano ','Sold ')+'× '+iN(ITEMS[k])+' (+$'+fmtK(pr)+(took?' · '+took:'')+')','good');saveVillage();renderShop();}
+function vSellAll(){ // SELL ALL: sprzedaje wszystkie owoce — swoje i ze wspólnej puli
   let total=0;const parts=[];
   for(const k of Object.keys(ITEMS)){const it=ITEMS[k];
     if(it.noSell||it.tool)continue;
-    const n=VG.inv[k]||0;if(n<=0)continue;
-    total+=n*itemPrice(k);parts.push(n+'× '+iN(it));VG.inv[k]=0;}
+    let n=vFruitTotal(k);if(n<=0)continue;
+    total+=n*itemPrice(k);parts.push(n+'× '+iN(it));
+    if(VNET.on){const f=VG.fruits[k]||0,useF=Math.min(f,n);
+      VG.fruits[k]=f-useF;const rest=n-useF;
+      if(rest>0)VG.inv[k]=Math.max(0,(VG.inv[k]||0)-rest);}
+    else VG.inv[k]=0;}
   if(total<=0){toast(T('Nie masz nic do sprzedania','Nothing to sell'),'bad');return;}
   vMoneyDelta(total);AU.pass();
   toast('💰 '+T('Sprzedano wszystko: ','Sold everything: ')+parts.join(', ')+' (+$'+fmtK(total)+')','good');
@@ -3484,17 +3559,17 @@ function vBuildInterior(w){ // pokoje z prostokątnymi przejściami — liczba w
 function bunkerSize(){return 3+2*VG.up.bunk;}
 function buildBunkerMesh(x,z,size,h){
   const g=new THREE.Group();g.position.set(x+size/2,h,z+size/2);
-  const slab=box(size+2,2.4,size+2,'#6a6f78');slab.position.y=0;g.add(slab); // wylewka: szersza z 2 stron i wydłużona w dół
-  const wall=box(size-.6,.4,size-.6,'#4a4f58');wall.position.y=1.25;g.add(wall);
-  const hatch=box(1.2,.14,1.2,'#101010');hatch.position.set(size/2-.9,1.32,size/2-.9);hatch.userData.bunker=true;g.add(hatch);
+  const slab=box(size+4,1.4,size+4,'#6a6f78');slab.position.y=.4;g.add(slab); // niski: ~1 blok nad ziemią, szersza wylewka
+  const rim=box(size-.6,.14,size-.6,'#4a4f58');rim.position.y=1.14;g.add(rim); // cienka obwódka na górze
+  const hatch=box(1.2,.16,1.2,'#101010');hatch.position.set(size/2-.9,1.24,size/2-.9);hatch.userData.bunker=true;g.add(hatch);
   g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
   return g;}
 function vAddBunker(x,z,by,size){size=size||bunkerSize();
   const h=Math.max(vTerrainH(x,z),vTerrainH(x+size-1,z+size-1),vTerrainH(x+size-1,z),vTerrainH(x,z+size-1));
   const mesh=buildBunkerMesh(x,z,size,h);mesh.userData.bunker=true;W.group.add(mesh);
-  const bx={x:x+size/2,y:h+.6,z:z+size/2,hx:size/2+1,hy:.6,hz:size/2+1};W.boxes.push(bx); // kolizja całej wylewki z nadmiarem
+  const bx={x:x+size/2,y:h+.55,z:z+size/2,hx:size/2+2,hy:.55,hz:size/2+2};W.boxes.push(bx); // kolizja szerszej wylewki
   const b={x,z,size,h,mesh,bx,by:by||null};
-  b.hatch={x:x+size-.9,y:h+1.45,z:z+size-.9};
+  b.hatch={x:x+size-.9,y:h+1.24,z:z+size-.9};
   VG.bunkers.push(b);vBuildInterior(W);return b;}
 function vRemoveBunker(b){W.group.remove(b.mesh);const i=W.boxes.indexOf(b.bx);if(i>=0)W.boxes.splice(i,1);
   const j=VG.bunkers.indexOf(b);if(j>=0)VG.bunkers.splice(j,1);
@@ -3507,8 +3582,8 @@ function vResizeBunker(b,size){ // 🚪 ulepszenie — postawiony bunker rośnie
   const h=Math.max(vTerrainH(b.x,b.z),vTerrainH(b.x+size-1,b.z+size-1),vTerrainH(b.x+size-1,b.z),vTerrainH(b.x,b.z+size-1));
   b.h=h;
   b.mesh=buildBunkerMesh(b.x,b.z,size,h);b.mesh.userData.bunker=true;W.group.add(b.mesh);
-  b.bx={x:b.x+size/2,y:h+.6,z:b.z+size/2,hx:size/2+1,hy:.6,hz:size/2+1};W.boxes.push(b.bx);
-  b.hatch={x:b.x+size-.9,y:h+1.45,z:b.z+size-.9};}
+  b.bx={x:b.x+size/2,y:h+.55,z:b.z+size/2,hx:size/2+2,hy:.55,hz:size/2+2};W.boxes.push(b.bx);
+  b.hatch={x:b.x+size-.9,y:h+1.24,z:b.z+size-.9};}
 // ---- 🧪 lab (biurko z craftingiem) ----
 function labModel(){ // białe biurko + drewniane krzesło + fioleczki z neonowym płynem
   const g=new THREE.Group();
@@ -3581,13 +3656,45 @@ function vNearBox(){const p=VG.p;if(!p)return null;
   for(const b of VG.boxes){const by=b.inB?BKY:vTerrainH(b.x,b.z);
     if(Math.hypot(p.x-b.x,p.z-b.z)<1.9&&Math.abs(p.y-by)<3.5)return b;}
   return null;}
-function vBoxCollect(){ // E przy skrzynce — odbierz owoce do ekwipunku
+// ---- 🤝 wspólny ekwipunek owoców (multiplayer) + 🍽️ jedzenie ----
+function vFruitAdd(k,n){ // w MP owocy trafiają do wspólnej puli — każdy może je sprzedać; w solo do ekwipunku
+  if(VNET.on){VG.fruits[k]=(VG.fruits[k]||0)+n;}
+  else{VG.inv[k]=(VG.inv[k]||0)+n;}}
+function vFruitTotal(k){return (VG.fruits[k]||0)+(VG.inv[k]||0);}
+function vEatFruit(k){ // 🍽️ zjedz owoc — przywraca głód (kosmiczne+ = cały pasek)
+  if(vFruitTotal(k)<=0)return;
+  const add=EAT[k]||30;
+  if(VNET.on){if(VG.fruits[k]>0)VG.fruits[k]--;else if(VG.inv[k]>0)VG.inv[k]--;else return;
+    vnetAct({a:'fruitEat',k});}
+  else{if(!(VG.inv[k]>0))return;VG.inv[k]--;}
+  HUN.v=Math.min(HUN.max,HUN.v+add);VG.hungWarn=false;AU.coin();
+  toast('🍽️ '+iN(ITEMS[k])+' +'+(add>=HUN.max?T('cały pasek głodu','full hunger bar'):(add+'s '+T('głodu','hunger'))),'good');
+  saveVillage();if(VG.gui==='inv')renderInv();}
+function vBoxCollect(){ // E przy skrzynce — odbierz owoce (w MP do wspólnej puli)
   const b=vNearBox();if(!b)return false;const t=boxTotal(b);if(t<=0)return false;
-  for(const k in b.cnt)VG.inv[k]=(VG.inv[k]||0)+b.cnt[k];
-  AU.coin();toast('📦 '+T('Odebrano: ','Collected: ')+Object.keys(b.cnt).map(k=>'+'+b.cnt[k]+' '+iN(ITEMS[k])).join(', '),'good');
+  const got={...b.cnt};
+  for(const k in got){if(VNET.on)VG.fruits[k]=(VG.fruits[k]||0)+got[k];else VG.inv[k]=(VG.inv[k]||0)+got[k];}
+  AU.coin();toast('📦 '+T('Odebrano: ','Collected: ')+Object.keys(got).map(k=>'+'+got[k]+' '+iN(ITEMS[k])).join(', '),'good');
   b.cnt={};vBoxLabel(b);vnetAct({a:'boxSet',x:round2(b.x),z:round2(b.z),in:b.inB?1:0,c:{}});
+  if(VNET.on)vnetAct({a:'fruitGet',c:got});
   saveVillage();if(VG.gui==='inv')renderInv();else if(VG.gui==='shop')renderShop();
   return true;}
+function vDropItem(){ // 📤 G — wyrzuć trzymany przedmiot; inna osoba podnosi go przez E
+  const k=VG.hand;
+  if(!k||!(VG.inv[k]>0)){toast('✋ '+T('Nie masz nic w ręce','Nothing in hand'),'bad');return;}
+  const it=ITEMS[k];
+  if(it.tool||it.sword||it.worker||it.box||it.axe||it.hoe){toast('🚫 '+T('Narzędzi i skrzynek nie można wyrzucać','Tools and crates cannot be dropped'),'bad');return;}
+  const p=VG.p;const fx=-Math.sin(INP.yaw),fz=-Math.cos(INP.yaw);
+  const x=p.x+fx*1.4,z=p.z+fz*1.4;
+  const y=(p.inside?BKY:vTerrainH(x,z))+.35;
+  const mesh=blockMesh(k,.45);mesh.position.set(x,y,z);mesh.castShadow=true;
+  W.group.add(mesh);
+  const id=++VG.dropIdc;
+  VG.drops.push({id,x,z,y,k,mesh});
+  VG.inv[k]--;
+  AU.pass();
+  toast('📤 '+T('Wyrzucono','Dropped')+' 1× '+iN(it)+' — '+T('E podnosi','E picks it up'),'');
+  vnetAct({a:'dropAdd',id,x:round2(x),z:round2(z),y:round2(y),k});}
 // ---- 🐇 pracownik królik ----
 const VRK={vis:false,x:0,z:0,hop:0,inB:false,carry:{},carryN:0,mv:false,fx:0,fz:1,wT:0,wx:0,wz:0,hb:null,lab:null};
 function vWorkBuild(){
@@ -3770,7 +3877,7 @@ function drawVMap(){
     x.fillStyle='#fff';x.strokeStyle='rgba(0,0,0,.6)';x.lineWidth=1.5;
     x.beginPath();x.moveTo(0,-8);x.lineTo(5.5,6);x.lineTo(0,3);x.lineTo(-5.5,6);x.closePath();x.fill();x.stroke();x.restore();}}
 // ---- 👽 kosmici + dzień/noc ----
-const DAY_LEN=240,NIGHT_LEN=120,CYC=DAY_LEN+NIGHT_LEN;
+const DAY_LEN=180,NIGHT_LEN=180,CYC=DAY_LEN+NIGHT_LEN; // ☀️ 3 min dnia, 🌙 3 min nocy
 const RAID={active:false,aliens:[],next:0};
 function vSkyNight(){niceSky({},{sky:0x10182c,fog:0x18223a,fogNear:35,fogFar:240,hemiI:.35,groundColor:0x1c2a18,sun:0x9fb4ff,sunI:.22,sunPos:[40,60,20],amb:.28,shadowSize:110+VG.up.map*20,shadowFar:280+VG.up.map*40});}
 function alienModel(){const g=new THREE.Group();
@@ -3940,8 +4047,9 @@ function vCanPlace(ix,iy,iz){
   $('#invList').addEventListener('click',e=>{const r=e.target.closest('.shRow');if(!r)return;AU.click();VG.sel=r.dataset.k;renderShop();});
   $('#invOv').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
     if(b.dataset.it){AU.click();VG.it=b.dataset.it;renderInv();}
-    else if(b.dataset.hold){AU.click();VG.hand=b.dataset.hold;renderInv();}});
-  $('#sellOne').onclick=()=>vSell(false);
+    else if(b.dataset.hold){AU.click();VG.hand=b.dataset.hold;renderInv();}
+    else if(b.dataset.eat){vEatFruit(b.dataset.eat);}});
+  $('#sellOne').onclick=()=>vSell();
   $('#sellAll').onclick=()=>vSellAll();
   addEventListener('mousedown',e=>{
     if(!VG.on||VG.gui||!pointerLocked||!VG.p)return;
@@ -4184,12 +4292,11 @@ function villStep(){ // fizyka wioski na zegaru (Worker) — działa też gdy ok
   vDayTick(dt);
   if(!VNET.on||VNET.isHost)vRaidHostTick(dt); // 👽 kosmici (host/solo)
   if(VNET.on)vnetTick(dt);}
-function vSwordHide(){if(W&&W.swordMesh)W.swordMesh.visible=false;}
 function vSwordCheck(dt){ // miecz w parkour + wyjście z parkour przy upadku
   if(!VG.p||!W)return;
   if(VG.p.park&&VG.p.y<6){VG.p.park=false;VG.p.x=W.secretTree.x+1.5;VG.p.z=W.secretTree.z;VG.p.y=vTerrainH(VG.p.x,VG.p.z);VG.p.vy=0;}
   if(W.swordMesh&&W.swordMesh.visible&&VG.inv.sword===0&&Math.hypot(VG.p.x-W.swordPos.x,VG.p.z-W.swordPos.z)<1.4&&Math.abs(VG.p.y-W.swordPos.y)<2.5&&!VG.p.down&&!VG.p.dead&&!VG.p.carriedBy){
-    VG.inv.sword=1;vSwordHide();VG.handKey='###';AU.fanfare();
+    VG.inv.sword=1;VG.handKey='###';AU.fanfare(); // miecz zostaje — każdy gracz może go wziąć
     toast('⚔️ '+T('Miecz z bunkra! Zadajesz 15 HP!','Bunker sword! You deal 15 HP!'),'good');
     saveVillage();vnetAct({a:'swordTake',by:VNET.myId});}}
 function syncHot(){ // pasek w kolejności zdobycia przedmiotów
@@ -4216,6 +4323,8 @@ function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
   vAlienRender(); // kosmici
   for(const t of W.trees||[]){ // 🪓 drżenie drzewa po uderzeniu siekierą
     const m=t.mesh;if(m&&m.userData.shakeT>0){m.userData.shakeT-=dt;m.rotation.z=Math.sin(now()*50)*.06*Math.max(0,m.userData.shakeT)/.35;}}
+  for(const d of VG.drops){ // 📤 wyrzucone przedmioty — bujają i się kręcą
+    if(d.mesh){d.mesh.rotation.y=now()*1.6;d.mesh.position.y=d.y+Math.sin(now()*2.6+d.id)*.07;}}
   if(W.exitLbl)W.exitLbl.visible=!!(VG.p&&VG.p.inside);
   if(W.swordMesh&&W.swordMesh.visible){W.swordMesh.rotation.y=now()*1.6;W.swordMesh.position.y=W.swordPos.y+Math.sin(now()*2)*.08;}
   if(W.swordMesh&&W.swordMesh.visible){W.swordMesh.rotation.y=now()*1.6;W.swordMesh.position.y=W.swordPos.y+Math.sin(now()*2)*.08;}
@@ -4233,8 +4342,8 @@ function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
           VG.ring.material.color.set(ok?0x66ff88:0xff6666);showR=true;}}
       else if(hi.bunker&&!p.inside&&!p.park){const size=bunkerSize();
         const ok=vCanBunker(aim.ix,aim.iz,size);
-        VG.bghost.scale.set(size,2,size);
-        VG.bghost.position.set(aim.ix+size/2-.5,vTerrainH(aim.ix+size/2,aim.iz+size/2)+.6,aim.iz+size/2-.5);
+        VG.bghost.scale.set(size+4,1.2,size+4);
+        VG.bghost.position.set(aim.ix+size/2-.5,vTerrainH(aim.ix+size/2,aim.iz+size/2)+.55,aim.iz+size/2-.5);
         VG.bghost.material.color.set(ok?0x66ff88:0xff6666);showB=true;bunkerAim=true;}
       else if(hi.tool){if(aim.block){VG.ghost.position.set(aim.block.x,aim.block.bx.y,aim.block.z);VG.ghost.material.color.set(0xff5555);showB=true;}}
       else if(vCanPlace(aim.ix,aim.iy,aim.iz)){const gy=aim.iy===0?vTerrainH(aim.ix,aim.iz)+.5:aim.iy+.5;
@@ -4271,9 +4380,14 @@ function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
       for(const c of W.carrots){if(c.mesh.visible&&Math.hypot(c.x-p.x,c.z-p.z)<1.5){msg='E — '+T('zjedz marchewkę (+20s głodu)','eat the carrot (+20s hunger)');break;}}}
     if(!msg){const nb=vNearBox(); // 📦 skrzynka obok
       if(nb)msg=boxTotal(nb)>0?('E — '+T('opróżnij skrzynkę','empty the crate')+' (📦 '+boxTotal(nb)+')'):('📦 '+T('skrzynka pracownika','worker crate'));}
+    if(!msg&&W&&VG.drops.length){ // 📤 wyrzucony przedmiot obok
+      let best=null,bd=1.8;
+      for(const d of VG.drops){const d2=Math.hypot(d.x-p.x,d.z-p.z);if(d2<bd&&Math.abs(p.y-d.y)<2.5){bd=d2;best=d;}}
+      if(best)msg='E — '+T('podnieś','pick up')+' '+iN(ITEMS[best.k]);}
     if(!msg&&VG.hand==='workr'&&(VG.inv.workr||0)>0)msg='🐇 LPM — '+T('zaznacz/odznacz roślinkę dla pracownika','mark/unmark a plant for the worker');
     if(!msg&&VG.hand==='axe'&&(VG.inv.axe||0)>0)msg='🪓 LPM — '+T('ścinaj drzewa (10 uderzeń = 10 desek)','chop trees (10 hits = 10 planks)');
     if(!msg&&VG.hand==='hoe'&&(VG.inv.hoe||0)>0)msg='⚒️ LPM — '+T('wypłenij roślinkę i odzyskaj nasiono','weed out a plant to recover its seed');
+    if(!msg&&VG.hand&&EAT[VG.hand]&&(VG.inv[VG.hand]||0)>0)msg='E — 🍽️ '+T('zjedz','eat')+' '+iN(ITEMS[VG.hand])+' (+'+(EAT[VG.hand]>=HUN.max?T('cały pasek','full bar'):EAT[VG.hand]+'s')+')';
     if(!msg&&!p.park)for(const pl of VG.plants){if(pl.inB!==!!p.inside||pl.dmgT>0||!(pl.f>0))continue;
       const sd2=SEEDS[pl.k];if(Math.hypot(pl.x-p.x,pl.z-p.z)<1.7+(sd2.k-1)){msg='E — '+T('zrywij owoce','pick the fruits');break;}}
     if(!msg&&!p.park&&!p.inside&&W&&W.secretTree&&Math.hypot(p.x-W.secretTree.x,p.z-W.secretTree.z)<2.4)msg='E — '+T('tajemnicze drzewo...','the mysterious tree...');
@@ -4286,14 +4400,15 @@ function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
   if(VG.axeMsgT>0){VG.axeMsgT-=dt;msg='🪓 '+VG.axeMsgHp+'/10';} // licznik uderzeń siekiery
   if(msg!==VG.prompt){VG.prompt=msg;$('#vPrompt').textContent=msg;show($('#vPrompt'),!!msg);}
   const dayEl=$('#vDay');
-  const dayTxt=(RAID.active?'👽 ':'')+(VG.dayT%CYC>=DAY_LEN?'🌙 ':'☀️ ')+T('Dzień ','Day ')+VG.day;
+  const ph2=VG.dayT%CYC, rem=Math.max(1,Math.ceil(ph2<DAY_LEN?DAY_LEN-ph2:CYC-ph2)); // ⏱️ ile jeszcze trwa dzień/noc
+  const dayTxt=(RAID.active?'👽 ':'')+(ph2>=DAY_LEN?'🌙 ':'☀️ ')+T('Dzień ','Day ')+VG.day+' · '+Math.floor(rem/60)+':'+('0'+Math.floor(rem%60)).slice(-2);
   if(dayTxt!==VG.dayTxt){VG.dayTxt=dayTxt;dayEl.textContent=dayTxt;}
   dayEl.className=VG.on?'on':'';
   VG.saveT+=dt;if(VG.saveT>8){VG.saveT=0;saveVillage();}}
 
 /* start pętli */
 frame();
-window.DBG={v:()=>VG,w:()=>W,raid:()=>RAID,hun:()=>HUN,wk:()=>VRK,flowers:()=>(W&&W.flowers)||[],carrots:()=>(W&&W.carrots)||[],alienHit:(i,dm)=>handleVillMsg({a:'alienHit',i,by:'DBG',dm}),nearAlien:(i)=>{const a=RAID.aliens[i];if(!a||!VG.p)return null;VG.p.x=a.x+1;VG.p.z=a.z;return{x:Math.round(a.x),z:Math.round(a.z),y:Math.round(VG.p.y)};}};
+window.DBG={v:()=>VG,w:()=>W,raid:()=>RAID,hun:()=>HUN,wk:()=>VRK,net:()=>VNET,flowers:()=>(W&&W.flowers)||[],carrots:()=>(W&&W.carrots)||[],alienHit:(i,dm)=>handleVillMsg({a:'alienHit',i,by:'DBG',dm}),nearAlien:(i)=>{const a=RAID.aliens[i];if(!a||!VG.p)return null;VG.p.x=a.x+1;VG.p.z=a.z;return{x:Math.round(a.x),z:Math.round(a.z),y:Math.round(VG.p.y)};}};
 </script>
 </body>
 </html>
