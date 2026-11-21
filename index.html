@@ -74,7 +74,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .shRow.dimr{opacity:.5}
 #invGrid,#buyList{max-height:46vh;overflow:auto}
 .bSlot.sel{border-color:rgba(255,255,255,.75);background:rgba(255,255,255,.15)}
-.bSlot i{width:28px;height:28px;border-radius:4px;display:block;box-shadow:inset 0 0 0 2px rgba(0,0,0,.25)}
+.bSlot i{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;overflow:hidden;box-shadow:inset 0 0 0 2px rgba(0,0,0,.25)}
 .bSlot b{position:absolute;top:2px;left:5px;font-size:11px;opacity:.65;font-weight:500}
 .bSlot span{position:absolute;bottom:2px;right:5px;font-size:12px}
 .shRow .lv{font-size:11px;opacity:.6;margin-right:4px}
@@ -2555,14 +2555,22 @@ const SEEDS={
   seed7:{n:'🔥 Rubinowe nasiono',en:'🔥 Ruby seed',cost:50000,grow:480,ft:110,max:6,out:'plant7',k:1.2,sc:'#ff3355',c1:'#8f2d3f',c2:'#b53a52',c3:'#7a2637',fl:'#ffb3c1',fr:'#ff3355'},
   seed8:{n:'🌌 Kosmiczne nasiono',en:'🌌 Cosmic seed',cost:90000,grow:600,ft:130,max:6,out:'plant8',k:1.25,sc:'#8a7dff',c1:'#3a3a8f',c2:'#5a5abf',c3:'#2a2a6f',fl:'#c9d2ff',fr:'#7d6bff'},
   seed9:{n:'👑 Królewskie nasiono',en:'👑 Royal seed',cost:2000000,grow:720,ft:150,max:6,out:'plant9',k:1.3,sc:'#e8c34a',c1:'#6a4fb0',c2:'#8a6fd0',c3:'#5a3f9f',fl:'#ffd60a',fr:'#ffd700'},
-  seed10:{n:'☄️ Meteorytowe nasiono',en:'☄️ Meteor seed',cost:10000000,grow:900,ft:180,max:6,out:'plant10',k:1.35,sc:'#5a5f6a',c1:'#3a3f4a',c2:'#4a5060',c3:'#2a2f3a',fl:'#ff6a3d',fr:'#ff8c1a'}};
-const SEED_KEYS=['seed1','seed2','seed3','seed4','seed5','seed6','seed7','seed8','seed9','seed10'];
+  seed10:{n:'☄️ Meteorytowe nasiono',en:'☄️ Meteor seed',cost:10000000,grow:900,ft:180,max:6,out:'plant10',k:1.35,sc:'#5a5f6a',c1:'#3a3f4a',c2:'#4a5060',c3:'#2a2f3a',fl:'#ff6a3d',fr:'#ff8c1a'},
+  seed11:{n:'🐉 Smocze nasiono',en:'🐉 Dragon seed',cost:50000000,grow:1080,ft:210,max:6,out:'plant11',k:1.4,sc:'#ff5a2a',c1:'#8f2d1f',c2:'#b53a2a',c3:'#7a2618',fl:'#ffb36b',fr:'#ff6a3d'},
+  seed12:{n:'🕳️ Nasiono czarnej dziury',en:'🕳️ Black hole seed',cost:250000000,grow:1260,ft:240,max:6,out:'plant12',k:1.45,sc:'#3a3a52',c1:'#14141f',c2:'#2a2a3a',c3:'#0a0a12',fl:'#9a7dff',fr:'#6a5ad0'},
+  seed13:{n:'🌠 Galaktyczne nasiono',en:'🌠 Galactic seed',cost:1000000000,grow:1440,ft:270,max:6,out:'plant13',k:1.5,sc:'#ff7ab8',c1:'#4a2a7f',c2:'#7a4fb0',c3:'#3a1f5f',fl:'#7ee7ff',fr:'#ff9ec4'},
+  seed14:{n:'♾️ Nieskończone nasiono',en:'♾️ Infinite seed',cost:5000000000,grow:1620,ft:300,max:6,out:'plant14',k:1.55,sc:'#7ee7ff',c1:'#2a6a75',c2:'#4a8f9a',c3:'#1f5a64',fl:'#ffffff',fr:'#a0f2ff'},
+  seed15:{n:'💥 Nasiono wielkiego wybuchu',en:'💥 Big bang seed',cost:25000000000,grow:1800,ft:330,max:6,out:'plant15',k:1.6,sc:'#ffd60a',c1:'#b8862e',c2:'#ffd60a',c3:'#8f6a1f',fl:'#fff2a0',fr:'#ffe08a'}};
+const SEED_KEYS=['seed1','seed2','seed3','seed4','seed5','seed6','seed7','seed8','seed9','seed10','seed11','seed12','seed13','seed14','seed15'];
 const BLOCKS=['wood','stone','brick','planks','dirt','bunker','lab'];
 const HOLD=[...SEED_KEYS,...BLOCKS,'pick','sword','workr','wbox','axe','hoe'];
 const ITEMS={plant:{n:'🌿 Roślinka',en:'🌿 Plant',sell:40,col:'#5cb85c'},plant2:{n:'🌸 Kwiatek',en:'🌸 Flower',sell:110,col:'#e88ab8'},plant3:{n:'✨ Złota roślinka',en:'✨ Golden plant',sell:260,col:'#ffd60a'},
   plant4:{n:'🍓 Truskawka',en:'🍓 Strawberry',sell:800,col:'#ff5a4a'},plant5:{n:'🍇 Winogrona',en:'🍇 Grapes',sell:3000,col:'#a05ad0'},plant6:{n:'💎 Kryształki',en:'💎 Crystals',sell:7000,col:'#66ffe0'},
   plant7:{n:'❤️ Rubiny',en:'❤️ Rubies',sell:15000,col:'#ff3355'},plant8:{n:'✴️ Kosmity',en:'✴️ Cosmic orbs',sell:30000,col:'#7d6bff'},
   plant9:{n:'👑 Korony',en:'👑 Crowns',sell:200000,col:'#ffd700'},plant10:{n:'☄️ Meteory',en:'☄️ Meteors',sell:1000000,col:'#ff8c1a'},
+  plant11:{n:'🐉 Smocze łuski',en:'🐉 Dragon scales',sell:5000000,col:'#ff5a2a'},plant12:{n:'🕳️ Syngularności',en:'🕳️ Singularities',sell:25000000,col:'#6a5ad0'},
+  plant13:{n:'🌠 Galaktyki',en:'🌠 Galaxies',sell:100000000,col:'#ff7ab8'},plant14:{n:'♾️ Nieskończoności',en:'♾️ Infinities',sell:500000000,col:'#a0f2ff'},
+  plant15:{n:'💥 Wybuchy',en:'💥 Big bangs',sell:2500000000,col:'#ffd60a'},
   wood:{n:'🟫 Drewno',en:'🟫 Wood',sell:5,buy:10,col:'#a8703d',noSell:true},
   stone:{n:'⬜ Kamień',en:'⬜ Stone',sell:8,buy:15,col:'#9aa0a6',noSell:true},
   brick:{n:'🟥 Cegła',en:'🟥 Brick',sell:10,buy:20,col:'#b5523b',noSell:true},
@@ -2571,7 +2579,7 @@ const ITEMS={plant:{n:'🌿 Roślinka',en:'🌿 Plant',sell:40,col:'#5cb85c'},pl
   bunker:{n:'🚪 Bunker',en:'🚪 Bunker',buy:2500,bunker:true,col:'#5a5f68',noSell:true},
   lab:{n:'🧪 Lab',en:'🧪 Lab',buy:800,lab:true,col:'#f2f2f2',noSell:true},
   wflower:{n:'⬜ Biały kwiatek',en:'⬜ White flower',col:'#f2f2f2',wflower:true,noSell:true},
-  sword:{n:'⚔️ Miecz',en:'⚔️ Sword',col:'#dfe6ee',sword:true,noSell:true},
+  sword:{n:'⚔️ Miecz',en:'⚔️ Sword',buy:200,col:'#dfe6ee',sword:true,noSell:true},
   pick:{n:'⛏️ Kilof',en:'⛏️ Pickaxe',buy:80,tool:true,col:'#8a8f98',noSell:true},
   mapa:{n:'🗺️ Mapa',en:'🗺️ Map',buy:400,map:true,noSell:true},
   workr:{n:'🐇 Pracownik królik',en:'🐇 Worker rabbit',buy:5000,worker:true,col:'#cfc6b8',noSell:true},
@@ -2580,12 +2588,13 @@ const ITEMS={plant:{n:'🌿 Roślinka',en:'🌿 Plant',sell:40,col:'#5cb85c'},pl
   hoe:{n:'⚒️ Motyka',en:'⚒️ Hoe',buy:150,hoe:true,col:'#8a8f98',noSell:true},
   asyst:{n:'🧑‍🌾 Asystent',en:'🧑‍🌾 Assistant',buy:20000,assistant:true,noSell:true}};
 for(const k of SEED_KEYS)ITEMS[k]={n:SEEDS[k].n,en:SEEDS[k].en,sell:Math.round(SEEDS[k].cost/2),seed:true,col:SEEDS[k].sc,noSell:true}; // nasionek nie można sprzedawać
-const EAT={plant:30,plant2:60,plant3:90,plant4:150,plant5:240,plant6:300,plant7:400,plant8:9999,plant9:9999,plant10:9999}; // 🍽️ jedzenie owoców — kosmiczne+ = cały pasek
+const EAT={plant:30,plant2:60,plant3:90,plant4:150,plant5:240,plant6:300,plant7:400,plant8:9999,plant9:9999,plant10:9999,plant11:9999,plant12:9999,plant13:9999,plant14:9999,plant15:9999}; // 🍽️ jedzenie owoców — kosmiczne+ = cały pasek
 const iconBg=k=>ITEMS[k].planks?'repeating-linear-gradient(0deg,#d6a05f 0 6px,#a8733a 6px 8px)':ITEMS[k].col;
+const iconEmoji=k=>ITEMS[k]&&ITEMS[k].n?(ITEMS[k].n.match(/^\S+/)||[''])[0]:''; // ⚔️/🪓/⚒️… z nazwy przedmiotu
 const emptyInv=()=>{const o={};for(const k in ITEMS)o[k]=0;return o;};
 const UPG={speed:{n:'👟 Szybkie łapki',en:'👟 Fast paws',d:'+12% prędkości chodu',enD:'+12% walk speed',max:3,cost:[150,300,450]},
   fert:{n:'🧪 Nawóz',en:'🧪 Fertilizer',d:'rośliny rosną 25% szybciej',enD:'plants grow 25% faster',max:3,cost:[200,400,600]},
-  price:{n:'🏷️ Targowanie',en:'🏷️ Bargaining',d:'+20% do cen sprzedaży',enD:'+20% sell prices',max:3,cost:[250,500,750]},
+  price:{n:'🏷️ Targowanie',en:'🏷️ Bargaining',d:'+5% do cen sprzedaży',enD:'+5% sell prices',max:3,cost:[250,500,750]},
   map:{n:'🗺️ Większa mapa',en:'🗺️ Bigger map',d:'łąka się powiększa (+12 promienia)',enD:'meadow expands (+12 radius)',max:3,cost:[2000,4000,7000]},
   bunk:{n:'🚪 Większy bunker',en:'🚪 Bigger bunker',d:'bunkier rośnie o 2 bloki + dodatkowy pokój w środku (też postawiony)',enD:'bunker grows by 2 blocks + an extra room inside (placed ones too)',max:3,cost:[3000,6000,10000]},
   hunger:{n:'🍽️ Powolny głód',en:'🍽️ Slow hunger',d:'głód spada o 20% wolniej',enD:'hunger drops 20% slower',max:3,cost:[1000,2500,5000]},
@@ -2605,8 +2614,9 @@ const VG={on:false,v:null,p:null,money:100,inv:emptyInv(),hot:[],up:{speed:0,fer
 const HUN={v:367,max:367}; // 🍗 pasek głodu: pełny → 0 zajmuje 6 min 7 s (367 s); sprint 2× szybciej
 const EXCS=4,EXN=55,EXO=27; // siatka eksploracji mapy (komórka 4, pokrywa ±110)
 const VRAY=new THREE.Raycaster();
-const itemPrice=k=>Math.round(ITEMS[k].sell*(1+.2*VG.up.price));
+const itemPrice=k=>Math.round(ITEMS[k].sell*(1+.05*VG.up.price)); // 🏷️ targowanie: +5% za poziom (znerfowane)
 const fmtK=n=>{n=Math.round(n);if(n<1000)return String(n);
+  if(n>=1e9){const v=n/1e9;return (n%1e9?String(Math.round(v*10)/10):String(Math.round(v)))+'B';}
   if(n>=1e6){const v=n/1e6;return (n%1e6?String(Math.round(v*10)/10):String(Math.round(v)))+'M';}
   const v=n/1000;return (n%1000?String(Math.round(v*10)/10):String(Math.round(v)))+'K';};
 function vMoneyDelta(d){ // wspólny portfel wioski — każda zmiana roześłana graczom
@@ -2790,6 +2800,25 @@ function vPlantVisual(pl){
     }else if(pl.k==='seed10'){ // ☄️ meteoryt — szara bryła z żarem
       const s1=sph(.07,'#3a3f4a');s1.scale.set(1.15,.9,1);s1.position.y=.16;pl.body.add(s1);
       const s2=sph(.03,'#ff6a3d');s2.position.set(.04,.17,.05);pl.body.add(s2);
+    }else if(pl.k==='seed11'){ // 🐉 smocze jajko z plamkami
+      const s1=sph(.075,'#ff5a2a');s1.scale.set(.9,1.25,.9);s1.position.y=.19;pl.body.add(s1);
+      const s2=sph(.02,'#7a2618');s2.position.set(.04,.24,.05);pl.body.add(s2);
+      const s3=sph(.018,'#7a2618');s3.position.set(-.04,.15,.04);pl.body.add(s3);
+    }else if(pl.k==='seed12'){ // 🕳️ mini czarna dziura z dyskiem
+      const s1=sph(.06,'#14141f');s1.position.y=.18;pl.body.add(s1);
+      const r1=cyl(.1,.1,.012,'#6a5ad0',16);r1.rotation.x=Math.PI/2;r1.position.y=.18;pl.body.add(r1);
+    }else if(pl.k==='seed13'){ // 🌠 asteroida z ogonem
+      const s1=sph(.06,'#ff7ab8');s1.position.set(.04,.2,0);pl.body.add(s1);
+      const t1=sph(.035,'#7ee7ff');t1.scale.set(2.2,.7,.7);t1.position.set(-.05,.15,0);pl.body.add(t1);
+      const t2=sph(.02,'#ffffff');t2.position.set(-.12,.13,0);pl.body.add(t2);
+    }else if(pl.k==='seed14'){ // ♾️ nieskończoność — dwie kulki
+      const s1=sph(.05,'#7ee7ff');s1.position.set(-.045,.17,0);pl.body.add(s1);
+      const s2=sph(.05,'#a0f2ff');s2.position.set(.045,.17,0);pl.body.add(s2);
+    }else if(pl.k==='seed15'){ // 💥 iskra wielkiego wybuchu
+      const s1=sph(.06,'#ffd60a');s1.position.y=.18;pl.body.add(s1);
+      for(let i=0;i<4;i++){const sp=cyl(.006,.018,.1,'#fff2a0',4);
+        sp.position.set(Math.cos(i*1.57)*.075,.18,Math.sin(i*1.57)*.075);
+        sp.rotation.z=Math.cos(i*1.57)*1.2;sp.rotation.x=Math.sin(i*1.57)*1.2;pl.body.add(sp);}
     }else{ // 🌌 kosmiczne — świecąca kulka z drobinami wokół
       const s1=sph(.07,'#8a7dff');s1.position.y=.18;pl.body.add(s1);
       const s2=sph(.026,'#c9d2ff');s2.position.set(.08,.25,0);pl.body.add(s2);
@@ -2876,6 +2905,49 @@ function vPlantVisual(pl){
       const slots=[[.26,.62,.2],[-.24,.58,.16],[.1,.52,-.26],[-.16,.8,-.12],[.22,.86,-.08],[0,.98,.14]];
       for(let i=0;i<sd.max;i++){const fr=sph(.075,'#ff8c1a');fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=1.55;
+    }else if(pl.k==='seed11'){ // smoczy krzak — czerwień z kolcami i jajami
+      const mnd=cyl(.36,.46,.18,'#5a1f12',10);mnd.position.y=.09;pl.body.add(mnd);
+      const st=cyl(.06,.08,.8,'#8f2d1f',6);st.position.y=.5;pl.body.add(st);
+      const b1=sph(.36,'#b53a2a');b1.scale.y=.8;b1.position.y=.85;pl.body.add(b1);
+      for(let i=0;i<3;i++){const sp=cyl(.015,.05,.3,'#ff5a2a',5);
+        sp.position.set(Math.cos(i*2.1)*.24,.95,Math.sin(i*2.1)*.24);sp.rotation.x=(i%2?.5:-.5);pl.body.add(sp);}
+      const slots=[[.26,.6,.2],[-.24,.56,.16],[.1,.5,-.26],[-.16,.8,-.12],[.22,.86,-.08],[0,.98,.14]];
+      for(let i=0;i<sd.max;i++){const fr=sph(.075,'#ff6a3d');fr.scale.set(.9,1.25,.9);fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
+      pl.lab.position.y=1.5;
+    }else if(pl.k==='seed12'){ // krzak czarnej dziury — ciemny z fioletowym dyskiem
+      const mnd=cyl(.36,.46,.18,'#0a0a12',10);mnd.position.y=.09;pl.body.add(mnd);
+      const st=cyl(.05,.07,.85,'#2a2a3a',6);st.position.y=.52;pl.body.add(st);
+      const b1=sph(.32,'#14141f');b1.scale.y=.8;b1.position.y=.85;pl.body.add(b1);
+      const disc=cyl(.4,.4,.03,'#6a5ad0',20);disc.rotation.x=Math.PI/2;disc.position.y=1.15;pl.body.add(disc);
+      const slots=[[.26,.6,.2],[-.24,.56,.16],[.1,.5,-.26],[-.16,.78,-.12],[.22,.84,-.08],[0,.42,.16]];
+      for(let i=0;i<sd.max;i++){const fr=sph(.07,'#9a7dff');fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
+      pl.lab.position.y=1.55;
+    }else if(pl.k==='seed13'){ // mgławicowy krzak — różowe i błękitne chmury
+      const mnd=cyl(.36,.46,.18,'#3a1f5f',10);mnd.position.y=.09;pl.body.add(mnd);
+      const st=cyl(.05,.06,.8,'#7a4fb0',6);st.position.y=.5;pl.body.add(st);
+      for(let i=0;i<3;i++){const b1=sph(.22,i%2?'#ff7ab8':'#7ee7ff');b1.scale.y=.7;
+        b1.position.set(Math.cos(i*2.1)*.2,.8+i*.06,Math.sin(i*2.1)*.2);pl.body.add(b1);}
+      const slots=[[.26,.6,.2],[-.24,.56,.16],[.1,.5,-.26],[-.16,.78,-.12],[.22,.86,-.08],[0,.42,.16]];
+      for(let i=0;i<sd.max;i++){const fr=sph(.07,'#ff9ec4');fr.scale.set(1,.7,1);fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
+      pl.lab.position.y=1.5;
+    }else if(pl.k==='seed14'){ // krzak nieskończoności — kryształowa ósemka
+      const mnd=cyl(.36,.46,.18,'#1f5a64',10);mnd.position.y=.09;pl.body.add(mnd);
+      const st=cyl(.05,.06,.8,'#2a6a75',6);st.position.y=.5;pl.body.add(st);
+      const o1=sph(.16,'#7ee7ff');o1.position.set(-.12,.85,0);pl.body.add(o1);
+      const o2=sph(.16,'#a0f2ff');o2.position.set(.12,1.05,0);pl.body.add(o2);
+      const slots=[[.26,.6,.2],[-.24,.56,.16],[.1,.5,-.26],[-.16,.78,-.12],[.22,.86,-.08],[0,.42,.16]];
+      for(let i=0;i<sd.max;i++){const fr=cyl(.02,.055,.13,'#a0f2ff',5);fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
+      pl.lab.position.y=1.55;
+    }else if(pl.k==='seed15'){ // krzak wielkiego wybuchu — złoty rdzeń z promieniami
+      const mnd=cyl(.36,.46,.18,'#8f6a1f',10);mnd.position.y=.09;pl.body.add(mnd);
+      const st=cyl(.06,.08,.8,'#b8862e',6);st.position.y=.5;pl.body.add(st);
+      const core=sph(.22,'#ffd60a');core.position.y=.95;pl.body.add(core);
+      for(let i=0;i<6;i++){const ray=cyl(.015,.045,.35,'#fff2a0',5);const a=i*1.047;
+        ray.position.set(Math.cos(a)*.3,.95+Math.sin(i%3)*.12,Math.sin(a)*.3);
+        ray.rotation.z=Math.cos(a)*1.35;ray.rotation.x=Math.sin(a)*1.35;pl.body.add(ray);}
+      const slots=[[.26,.6,.2],[-.24,.56,.16],[.1,.5,-.26],[-.16,.78,-.12],[.22,.86,-.08],[0,.42,.16]];
+      for(let i=0;i<sd.max;i++){const fr=sph(.07,'#ffe08a');fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
+      pl.lab.position.y=1.6;
     }else{ // kryształowa roślina
       const mnd=cyl(.3,.4,.16,'#3a4a55',10);mnd.position.y=.08;pl.body.add(mnd);
       const st=cyl(.04,.05,.6,'#3a8f9a',6);st.position.y=.38;pl.body.add(st);
@@ -2967,7 +3039,6 @@ function enterVillage(v){
     if(typeof P.hot==='string'&&P.hot)VG.hot=P.hot.split(',').filter(k=>HOLD.includes(k));
     if(Array.isArray(P.pl))for(const q of P.pl){const k=SEEDS[q.k]?q.k:'seed1',sd=SEEDS[k];
       vNewPlant(q.x,q.z,k,q.st==='bush'?'bush':'seed',+q.t||0,+q.tm||sd.ft,Math.min(sd.max,+q.f||0),q.b===1);}
-    if(P.sw)W.swordMesh&&(W.swordMesh.visible=false);
     if(P.dy){VG.dayT=+P.dtm||0;VG.day=Math.floor(VG.dayT/CYC)+1;VG.phase=VG.dayT%CYC<DAY_LEN?'day':'night';if(VG.phase==='night')vSkyNight();else vSky(VG.up.map);}}
   else VNET.pending=null;
   if(!VG.handG){VG.handG=new THREE.Group();VG.handG.position.set(.34,-.3,-.62);camera.add(VG.handG);}
@@ -3047,7 +3118,6 @@ function vnetHostData(c,d){if(!d||typeof d!=='object')return;
         bx:VG.boxes.map(b=>({x:round2(b.x),y:round2(b.y),z:round2(b.z),in:b.inB?1:0,c:b.cnt})),
         tc:VG.choppedTrees,
         as:VG.hasAssist?1:0,fr:VG.fruits,
-        sw:VG.inv.sword>0?1:0,
         dy:VG.day,dtm:Math.round(VG.dayT),
         pl:VG.plants.map(p=>({x:p.x,z:p.z,k:p.k,st:p.st,t:p.t,tm:p.tm,f:p.f,b:p.inB?1:0,h:p.hp,d:Math.round(p.dmgT)}))});}catch(e){}
       vnetEv({a:'pjoin',id,nick:pl.nick,color:pl.color});
@@ -3095,7 +3165,7 @@ function vnetClientData(d){if(!d||typeof d!=='object')return;
     VNET.players={};for(const p of(d.players||[]))VNET.players[p.id]={id:p.id,nick:p.nick,color:p.color,x:0,y:0,z:6,yaw:0};
     showNet('');
     const v={id:d.vid,name:d.name||('Wioska '+VNET.code),multi:true,code:VNET.code};
-    VNET.pending={bl:d.bl||[],bk:d.bk||[],lb:d.lb||[],bx:d.bx||[],tc:d.tc||[],pl:d.pl||[],mapLv:d.mapLv,sw:d.sw,as:d.as,fr:d.fr||{},dy:d.dy,dtm:d.dtm,hot:VG.hot.join(',')};
+    VNET.pending={bl:d.bl||[],bk:d.bk||[],lb:d.lb||[],bx:d.bx||[],tc:d.tc||[],pl:d.pl||[],mapLv:d.mapLv,as:d.as,fr:d.fr||{},dy:d.dy,dtm:d.dtm,hot:VG.hot.join(',')};
     toast('🏘️ '+T('Dołączono do wioski','Joined village')+' „'+esc(v.name)+'"','good');
     enterVillage(v);
     VG.money=Math.max(0,Math.round(+d.m||0)); // wspólny portfel od hosta
@@ -3134,7 +3204,7 @@ function vAlienHitMe(dm,px,pz){ // kosmita trafia lokalnego gracza — bez knock
   p.hp=Math.max(-25,p.hp-(dm||5));p.hpT=now();
   AU.hitP();$('#hurtVig').style.opacity=.9;setTimeout(()=>{if(VG.on)$('#hurtVig').style.opacity=0;},180);
   if(!p.down&&!p.dead&&p.hp<=0){p.down=true;p.hp=0;
-    toast('😵 '+T('Powalony! Ktoś może Cię podnieść (F) i odnieść do dziadka','Knocked down! Someone can pick you up (F)'),'bad');}}
+    toast('😵 '+T('Powalony! Ktoś może Cię podnieść (E/F) i odnieść do dziadka','Knocked down! Someone can pick you up (E/F)'),'bad');}}
 function handleVillMsg(ev){if(!ev||!ev.a)return;
   switch(ev.a){
     case 'blkAdd':if(VG.on&&!VG.blocks.some(b=>b.x===ev.x&&b.y===ev.y&&b.z===ev.z))vAddBlock(ev.bt,ev.x,ev.y,ev.z);break;
@@ -3184,9 +3254,12 @@ function handleVillMsg(ev){if(!ev||!ev.a)return;
     case 'fruitEat':{if(VG.on&&VNET.on&&ev.by!==VNET.myId&&ev.k)VG.fruits[ev.k]=Math.max(0,(VG.fruits[ev.k]||0)-1);break;}
     case 'dropAdd':{if(!VG.on||!W)break;
       if(VG.drops.some(d=>d.id===ev.id))break;
-      const mesh=blockMesh(ev.k,.45);mesh.position.set(+ev.x||0,+ev.y||0,+ev.z||0);mesh.castShadow=true;
+      let mesh;
+      if(ev.k==='sword'){mesh=swordModel(ev.t||1);mesh.scale.setScalar(.8);}
+      else{mesh=blockMesh(ev.k,.45);}
+      mesh.position.set(+ev.x||0,+ev.y||0,+ev.z||0);mesh.castShadow=true;
       W.group.add(mesh);
-      VG.drops.push({id:ev.id,x:+ev.x||0,z:+ev.z||0,y:+ev.y||0,k:ev.k,mesh});break;}
+      VG.drops.push({id:ev.id,x:+ev.x||0,z:+ev.z||0,y:+ev.y||0,k:ev.k,mesh,t:ev.t||0});break;}
     case 'dropGet':{if(!VG.on)break;const d=VG.drops.find(d=>d.id===ev.id);
       if(d){W.group.remove(d.mesh);VG.drops.splice(VG.drops.indexOf(d),1);}break;}
     case 'plantDmg':{if(!VG.on)break;const pl=VG.plants.find(p=>Math.abs(p.x-ev.x)<.3&&Math.abs(p.z-ev.z)<.3);
@@ -3216,6 +3289,9 @@ function villageEAction(){ // E: drzewo/parkour, wyjścia, dziadek
   const p=VG.p;if(!p)return;
   if(p.down||p.dead)return;
   if(p.carriedBy){if(vElderDist()<3.8)return;return;} // nosisz: F odłóż, przy dziadku trzymaj E
+  // 🤝 podnieś leżącego gracza (E lub F) — odnieś go do dziadka i przytrzymaj E, żeby wyleczył
+  if(VNET.on&&!p.carriedBy){const lid=vLyingNear();
+    if(lid){vnetAct({a:'carry',id:lid,by:VNET.myId});AU.pass();return;}}
   if(p.park){ // wyjście z parkour
     if(W&&W.pkExit&&Math.hypot(p.x-W.pkExit.x,p.z-W.pkExit.z)<2){
       p.park=false;p.x=W.secretTree.x+1.5;p.z=W.secretTree.z;p.y=vTerrainH(p.x,p.z);p.vy=0;p.vx=p.vz=0;
@@ -3265,7 +3341,9 @@ function villageEAction(){ // E: drzewo/parkour, wyjścia, dziadek
   if(W&&VG.drops.length){let best=null,bd=1.8;
     for(const d of VG.drops){const d2=Math.hypot(d.x-p.x,d.z-p.z);
       if(d2<bd&&Math.abs(p.y-d.y)<2.5){bd=d2;best=d;}}
-    if(best){VG.inv[best.k]=(VG.inv[best.k]||0)+1;AU.coin();
+    if(best){if(best.k==='sword'){VG.inv.sword=Math.max(VG.inv.sword||0,best.t||1);VG.handKey='###';} // miecz z poziomem
+      else VG.inv[best.k]=(VG.inv[best.k]||0)+1;
+      AU.coin();
       toast('✋ +1 '+iN(ITEMS[best.k]),'good');
       W.group.remove(best.mesh);VG.drops.splice(VG.drops.indexOf(best),1);
       saveVillage();if(VG.gui==='inv')renderInv();
@@ -3281,8 +3359,8 @@ function villageEAction(){ // E: drzewo/parkour, wyjścia, dziadek
       VG.inv.wflower=(VG.inv.wflower||0)+1;AU.coin();
       toast('+1 '+iN(ITEMS.wflower),'good');saveVillage();
       vnetAct({a:'flowerPick',x:round2(best.x),z:round2(best.z)});return;}}
-  // zrywanie owoców (E przy krzaku)
-  for(const pl of VG.plants){if(pl.dmgT>0||!(pl.f>0))continue;
+  // zrywanie owoców (E przy krzaku) — tylko na swoim poziomie (bunker ≠ powierzchnia)
+  for(const pl of VG.plants){if(pl.inB!==!!p.inside||pl.dmgT>0||!(pl.f>0))continue;
     const sd2=SEEDS[pl.k];
     if(Math.hypot(pl.x-p.x,pl.z-p.z)<1.7+(sd2.k-1)){
       const bonus=vDirtAt(pl.x,pl.z)?Math.round(pl.f*itemPrice(sd2.out)*.1):0; // lepsza ziemia: +10% wartości
@@ -3351,6 +3429,9 @@ function renderShop(){
     const mp=ITEMS.mapa;
     h+='<div class="shRow"><div class="shn">'+iN(mp)+'<small>'+T('szara mapa łąki — szare miejsca odkrywasz chodząc · klawisz M pokazuje mapę','grey map of the meadow — walk into grey areas to explore · press M to view it')+(VG.mapOwned?' · '+T('✔ masz','✔ owned'):'')+'</small></div>'+
       (VG.mapOwned?'<b>'+T('✔ MASZ','✔ OWNED')+'</b>':'<b>$'+fmtK(mp.buy)+'</b><button class="btn sm calm" data-act="mapa"'+(VG.money<mp.buy?' disabled':'')+'>'+BUY+'</button>')+'</div>';
+    const sw=ITEMS.sword;
+    h+='<div class="shRow"><div class="shn">'+iN(sw)+'<small>'+T('uderzasz 15 HP · możesz go wyrzucić (G) i oddać kumplowi · zakup ponowny po wyrzuceniu','deals 15 HP · you can drop it (G) and give it to a friend · buy again after dropping')+(VG.inv.sword>0?' · '+T('✔ masz','✔ owned'):'')+'</small></div>'+
+      (VG.inv.sword>0?'<b>'+T('✔ MASZ','✔ OWNED')+'</b>':'<b>$'+fmtK(sw.buy)+'</b><button class="btn sm calm" data-act="sword"'+(VG.money<sw.buy?' disabled':'')+'>'+BUY+'</button>')+'</div>';
     const ax=ITEMS.axe,axOwn=VG.inv.axe>0;
     h+='<div class="shRow"><div class="shn">'+iN(ax)+'<small>'+T('ścina drzewa — 10 uderzeń, z drzewa wypada 10 desek · jednorazowy zakup','chops trees — 10 hits per tree, each drops 10 planks · one-time purchase')+(axOwn?' · '+T('✔ masz','✔ owned'):'')+'</small></div>'+
       (axOwn?'<b>'+T('✔ MASZ','✔ OWNED')+'</b>':'<b>$'+fmtK(ax.buy)+'</b><button class="btn sm calm" data-act="axe"'+(VG.money<ax.buy?' disabled':'')+'>'+BUY+'</button>')+'</div>';
@@ -3377,7 +3458,7 @@ function renderShop(){
 function renderInv(){
   $('#invMoney').textContent='$'+fmtK(VG.money);
   document.querySelectorAll('#invOv [data-it]').forEach(b=>b.classList.toggle('sel',b.dataset.it===VG.it));
-  const keys=VG.it==='seeds'?SEED_KEYS:(VG.it==='blocks'?[...BLOCKS,'pick','axe','hoe']:(VG.it==='workers'?['workr','wbox']:['plant','plant2','plant3','plant4','plant5','plant6','plant7','plant8','plant9','plant10']));
+  const keys=VG.it==='seeds'?SEED_KEYS:(VG.it==='blocks'?[...BLOCKS,'pick','axe','hoe']:(VG.it==='workers'?['workr','wbox']:['plant','plant2','plant3','plant4','plant5','plant6','plant7','plant8','plant9','plant10','plant11','plant12','plant13','plant14','plant15']));
   let h='';
   for(const k of keys){const it=ITEMS[k];let n=VG.inv[k]||0;
     if(EAT[k]&&VNET.on)n=vFruitTotal(k); // 🤝 w MP owoce liczone ze wspólnej puli
@@ -3437,6 +3518,11 @@ function vBuy(act,k,n){
     if(VG.money<it.buy){toast(T('Za mało pieniędzy','Not enough money'),'bad');return;}
     vMoneyDelta(-it.buy);VG.inv.pick=1;VG.hand='pick';AU.pass();
     toast('⛏️ '+T('Kilof w ręce — celuj w blok i kliknij LPM, żeby zniszczyć','Pickaxe in hand — aim at a block and click LMB to destroy'),'good');
+  }else if(act==='sword'){const it=ITEMS.sword;
+    if(VG.inv.sword>0){toast('⚔️ '+T('Masz już miecz','You already have a sword'),'bad');return;}
+    if(VG.money<it.buy){toast(T('Za mało pieniędzy','Not enough money'),'bad');return;}
+    vMoneyDelta(-it.buy);VG.inv.sword=1;VG.hand='sword';VG.handKey='###';AU.pass();
+    toast('⚔️ '+T('Miecz w ręce — uderzasz 15 HP!','Sword in hand — you deal 15 HP!'),'good');
   }else if(act==='axe'){const it=ITEMS.axe;
     if(VG.inv.axe>0){toast('🪓 '+T('Masz już siekierę','You already have an axe'),'bad');return;}
     if(VG.money<it.buy){toast(T('Za mało pieniędzy','Not enough money'),'bad');return;}
@@ -3679,22 +3765,26 @@ function vBoxCollect(){ // E przy skrzynce — odbierz owoce (w MP do wspólnej 
   if(VNET.on)vnetAct({a:'fruitGet',c:got});
   saveVillage();if(VG.gui==='inv')renderInv();else if(VG.gui==='shop')renderShop();
   return true;}
-function vDropItem(){ // 📤 G — wyrzuć trzymany przedmiot; inna osoba podnosi go przez E
+function vDropItem(){ // 📤 G — wyrzuć trzymany przedmiot (też miecz i narzędzia); ktoś podnosi przez E
   const k=VG.hand;
   if(!k||!(VG.inv[k]>0)){toast('✋ '+T('Nie masz nic w ręce','Nothing in hand'),'bad');return;}
   const it=ITEMS[k];
-  if(it.tool||it.sword||it.worker||it.box||it.axe||it.hoe){toast('🚫 '+T('Narzędzi i skrzynek nie można wyrzucać','Tools and crates cannot be dropped'),'bad');return;}
+  if(it.worker||it.box){toast('🚫 '+T('Pracownika i skrzynki nie można wyrzucać',"The worker and crate can't be dropped"),'bad');return;}
+  const tier=k==='sword'?(VG.inv.sword>=2?2:1):0; // miecz: zapamiętaj poziom (zwykły/lepszy)
   const p=VG.p;const fx=-Math.sin(INP.yaw),fz=-Math.cos(INP.yaw);
   const x=p.x+fx*1.4,z=p.z+fz*1.4;
   const y=(p.inside?BKY:vTerrainH(x,z))+.35;
-  const mesh=blockMesh(k,.45);mesh.position.set(x,y,z);mesh.castShadow=true;
+  let mesh;
+  if(k==='sword'){mesh=swordModel(tier);mesh.scale.setScalar(.8);}
+  else{mesh=blockMesh(k,.45);}
+  mesh.position.set(x,y,z);mesh.castShadow=true;
   W.group.add(mesh);
   const id=++VG.dropIdc;
-  VG.drops.push({id,x,z,y,k,mesh});
+  VG.drops.push({id,x,z,y,k,mesh,t:tier});
   VG.inv[k]--;
   AU.pass();
   toast('📤 '+T('Wyrzucono','Dropped')+' 1× '+iN(it)+' — '+T('E podnosi','E picks it up'),'');
-  vnetAct({a:'dropAdd',id,x:round2(x),z:round2(z),y:round2(y),k});}
+  vnetAct({a:'dropAdd',id,x:round2(x),z:round2(z),y:round2(y),k,t:tier});}
 // ---- 🐇 pracownik królik ----
 const VRK={vis:false,x:0,z:0,hop:0,inB:false,carry:{},carryN:0,mv:false,fx:0,fz:1,wT:0,wx:0,wz:0,hb:null,lab:null};
 function vWorkBuild(){
@@ -4353,7 +4443,7 @@ function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
   syncHot(); // pasek: sloty w kolejności zdobycia
   const bk=VG.hot.join(',')+'|'+VG.hand;
   if(bk!==VG.barKey){VG.barKey=bk;
-    $('#vBar').innerHTML=VG.hot.map((k,i)=>'<div class="bSlot'+(VG.hand===k?' sel':'')+'"><b>'+(i<9?i+1:(i===9?'0':(i===10?'X':(i===11?'G':(i===12?'V':i+1)))))+'</b><i style="background:'+iconBg(k)+(ITEMS[k].seed?';border-radius:50%':'')+'"></i><span>×'+VG.inv[k]+'</span></div>').join('');}
+    $('#vBar').innerHTML=VG.hot.map((k,i)=>'<div class="bSlot'+(VG.hand===k?' sel':'')+'"><b>'+(i<9?i+1:(i===9?'0':(i===10?'X':(i===11?'V':i+1))))+'</b><i style="background:'+iconBg(k)+(ITEMS[k].seed?';border-radius:50%':'')+'">'+iconEmoji(k)+'</i><span>×'+VG.inv[k]+'</span></div>').join('');}
   $('#vMoney').textContent='$'+fmtK(VG.money);
   const hpk=Math.round(p.hp);
   if(hpk!==VG.hpKey){VG.hpKey=hpk;$('#vHpFill').style.width=Math.max(0,Math.min(100,p.hp))+'%';$('#vHpTxt').textContent=Math.ceil(p.hp);}
@@ -4364,8 +4454,8 @@ function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
   if(VG.mapOpen)drawVMap(); // 🗺️ mapa (M)
   // podnoszenie/leczenie/podpowiedzi
   let msg='';
-  if(p.dead)msg='💀 '+T('Nie żyjesz — ktoś musi Cię podnieść (F) i odnieść do dziadka',"You're dead — someone must pick you up (F) and carry you to the hamster");
-  else if(p.down)msg='😵 '+T('Powalony — ktoś może Cię podnieść (F) i odnieść do dziadka','Knocked down — someone can pick you up (F) and carry you to the hamster');
+  if(p.dead)msg='💀 '+T('Nie żyjesz — ktoś musi Cię podnieść (E/F) i odnieść do dziadka',"You're dead — someone must pick you up (E/F) and carry you to the hamster");
+  else if(p.down)msg='😵 '+T('Powalony — ktoś może Cię podnieść (E/F) i odnieść do dziadka','Knocked down — someone can pick you up (E/F) and carry you to the hamster');
   else if(p.carriedBy){
     msg='🤲 '+T('Nosisz gracza — F: odłóż','Carrying a player — F: put down');
     if(vElderDist()<3.8)msg='💉 '+T('Trzymaj E — dziadek wyleczy gracza','Hold E — the hamster will heal the player');
@@ -4395,7 +4485,7 @@ function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
     if(!msg&&p.park)msg='🧗 '+T('Parkour! Karta i miecz na końcu','Parkour! Card and sword at the end');
     if(!msg&&p.inside&&VG.assistG&&Math.hypot(p.x-VG.assistG.position.x,p.z-VG.assistG.position.z)<3.8)msg='[E] '+T('Porozmawiaj z Asystentem','Talk to the Assistant');
     if(!msg&&p.inside)msg='🚪 '+T('E w rogu — wyjście · sadź nasiona na glebie','E at the corner — exit · plant seeds on the soil');
-    if(!msg&&VNET.on&&!VG.gui&&vLyingNear())msg='F — '+T('podnieś gracza','pick up the player');
+    if(!msg&&VNET.on&&!VG.gui&&vLyingNear())msg='E/F — '+T('podnieś gracza','pick up the player');
     if(!msg&&!VG.gui&&vElderDist()<3.8)msg='[E] '+T('Porozmawiaj ze starym chomikiem','Talk to the Old Hamster');}
   if(VG.axeMsgT>0){VG.axeMsgT-=dt;msg='🪓 '+VG.axeMsgHp+'/10';} // licznik uderzeń siekiery
   if(msg!==VG.prompt){VG.prompt=msg;$('#vPrompt').textContent=msg;show($('#vPrompt'),!!msg);}
@@ -4408,7 +4498,7 @@ function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
 
 /* start pętli */
 frame();
-window.DBG={v:()=>VG,w:()=>W,raid:()=>RAID,hun:()=>HUN,wk:()=>VRK,net:()=>VNET,flowers:()=>(W&&W.flowers)||[],carrots:()=>(W&&W.carrots)||[],alienHit:(i,dm)=>handleVillMsg({a:'alienHit',i,by:'DBG',dm}),nearAlien:(i)=>{const a=RAID.aliens[i];if(!a||!VG.p)return null;VG.p.x=a.x+1;VG.p.z=a.z;return{x:Math.round(a.x),z:Math.round(a.z),y:Math.round(VG.p.y)};}};
+window.DBG={v:()=>VG,w:()=>W,raid:()=>RAID,hun:()=>HUN,wk:()=>VRK,net:()=>VNET,rem:()=>REMOTES,flowers:()=>(W&&W.flowers)||[],carrots:()=>(W&&W.carrots)||[],alienHit:(i,dm)=>handleVillMsg({a:'alienHit',i,by:'DBG',dm}),nearAlien:(i)=>{const a=RAID.aliens[i];if(!a||!VG.p)return null;VG.p.x=a.x+1;VG.p.z=a.z;return{x:Math.round(a.x),z:Math.round(a.z),y:Math.round(VG.p.y)};}};
 </script>
 </body>
 </html>
