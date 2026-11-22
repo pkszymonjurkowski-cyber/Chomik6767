@@ -3784,8 +3784,9 @@ function vBuildInterior(w){ // komnata + PIĘTRA wg ulepszenia: 0=wyjście+podzi
         f.userData.inB=true;if(i===rooms-1)f.userData.noSeed=true; // część z wyjściem: bez nasion
         if(i<rooms-1){const s=mesh(new THREE.BoxGeometry(roomW/rooms,.16,roomW),M.soil,cx,yr+.08,0);s.userData.inB=true;}}
     }else{
-      const f=mesh(new THREE.BoxGeometry(roomW,.5,roomW),n<floors-1?M.soil:M.floor,0,yr-.25,0);
-      if(n<floors-1)f.userData.inB=true; // piętra 1-3: sadzisz wszędzie; piętro 4: puste
+      const labFloor=n===4&&VG.up.bunk>=3; // TYLKO piętro 4 (lab) jest szare — piętra 1-3 zawsze CAŁE z ziemią
+      const f=mesh(new THREE.BoxGeometry(roomW,.5,roomW),labFloor?M.floor:M.soil,0,yr-.25,0);
+      if(!labFloor)f.userData.inB=true;
     }
     mesh(new THREE.BoxGeometry(roomW+.6,.5,roomW+.6),M.ceil,0,yr+5.5,0); // sufit
     for(const[wx,wz,ww,wd]of[[0,-half,roomW,.6],[0,half,roomW,.6],[-half,0,.6,roomW],[half,0,.6,roomW]])
@@ -4238,6 +4239,8 @@ function vRaidHostTick(dt){ // host/solo: AI kosmitów
       if((pl.floor||0)>0)continue; // kosmici nie schodzą na niższe piętra
       if((pl.inB===true)!==a.inIn)continue; // rośliny tylko na swoim poziomie
       const d=Math.hypot(pl.x-a.x,pl.z-a.z);if(d<bf){bf=d;tgtF=pl;}}
+    // 🌱 PRIORYTET: najpierw niszczą roślinki; gracza atakują tylko z bliska (1.5) albo gdy roślin brak
+    if(tgtF&&tgtP&&bp>1.5)tgtP=null;
     let mvx=0,mvz=0,spd=3.2*dt;
     if(tgtP){const dx=tgtP[1]-a.x,dz=tgtP[2]-a.z,d=Math.hypot(dx,dz)||1;
       if(d>1.1){mvx=dx/d*spd;mvz=dz/d*spd;}
