@@ -452,6 +452,12 @@ kbd{background:rgba(255,255,255,.15);border-radius:5px;padding:1px 7px;font-fami
     <div id="vAdvBody"></div>
   </div>
 </div>
+<div id="vTravOv" class="ov" hidden>
+  <div class="panel labP">
+    <div class="shopTop"><span>🧭 PODRÓŻNIK</span><button class="btn sm ghost" id="vTravX">✕</button></div>
+    <div id="vTravBody"></div>
+  </div>
+</div>
 
 <!-- LOBBY -->
 <div id="lobbyOv" class="ov dim" hidden>
@@ -2607,15 +2613,15 @@ const EAT={plant:30,plant2:60,plant3:90,plant4:150,plant5:240,plant6:300,plant7:
 ITEMS.bottle={n:'🧴 Butelka wody',en:'🧴 Water bottle',col:'#7ec8e3',noSell:true,ing:true};
 ITEMS.dye={n:'🔵 Barwnik niebieski',en:'🔵 Blue dye',col:'#1e90ff',noSell:true,ing:true};
 ITEMS.subst={n:'🧪 Substancja',en:'🧪 Substance',col:'#39ff14',noSell:true,ing:true};
-// 🧬 mutacje nasion — generowane: nasiono + substancja → nasiono mutant (+5% wartości owocu, +10% szybszy wzrost, neon)
+// 🧬 mutacje nasion — generowane: nasiono + substancja → nasiono mutant (+20% wartości owocu, +15% szybszy wzrost, neon)
 const MUT_KEYS=[];
 for(const k of SEED_KEYS){
   const s=SEEDS[k],base=s.n.replace(/^\S+\s*/,'');
   const mid='m'+k,oid='mo'+s.out;
-  SEEDS[mid]={n:'🧬 '+base+' (mut)',en:s.en+' (mut)',cost:0,grow:Math.round(s.grow*.9),ft:Math.round(s.ft*.9),max:s.max,out:oid,k:s.k,sc:s.sc,c1:s.c1,c2:s.c2,c3:s.c3,fl:s.fl,fr:s.fr,vb:k,mut:true};
+  SEEDS[mid]={n:'🧬 '+base+' (mut)',en:s.en+' (mut)',cost:0,grow:Math.round(s.grow*.85),ft:Math.round(s.ft*.85),max:s.max,out:oid,k:s.k,sc:s.sc,c1:s.c1,c2:s.c2,c3:s.c3,fl:s.fl,fr:s.fr,vb:k,mut:true};
   ITEMS[mid]={n:'🧬 '+base+' (mut)',en:'🧬 '+base+' (mut)',seed:true,col:s.sc,noSell:true};
   const fo=ITEMS[s.out];
-  ITEMS[oid]={n:'🧬 '+fo.n.replace(/^\S+\s*/,'')+' (mut)',en:'🧬 mutated',sell:Math.round(fo.sell*1.05),col:fo.col};
+  ITEMS[oid]={n:'🧬 '+fo.n.replace(/^\S+\s*/,'')+' (mut)',en:'🧬 mutated',sell:Math.round(fo.sell*1.2),col:fo.col};
   MUT_KEYS.push(mid);
 }
 HOLD.push(...MUT_KEYS); // zmutowane nasiono trzymasz w ręce i sadzisz jak zwykłe
@@ -3066,6 +3072,11 @@ function enterVillage(v){
       vRemoveTreeAt(+q[0]||0,+q[1]||0);VG.choppedTrees.push([+q[0]||0,+q[1]||0]);}
     if(P.as)VG.hasAssist=true;
     if(P.f4)VG.floor4=true;
+    if(P.up&&typeof P.up==='object'){let bun=false;
+      for(const k in P.up){if(!UPG[k])continue;
+        const nl=Math.max(0,Math.min(UPG[k].max,+P.up[k]||0));
+        if(nl>(VG.up[k]||0)){VG.up[k]=nl;if(k==='bunk')bun=true;}}
+      if(bun&&W)vBuildInterior(W);}
     if(P.fr&&typeof P.fr==='object')for(const k in P.fr)if(typeof P.fr[k]==='number')VG.fruits[k]=P.fr[k]; // 🤝 wspólna pula owoców od hosta
     if(typeof P.hot==='string'&&P.hot)VG.hot=P.hot.split(',').filter(k=>HOLD.includes(k));
     if(Array.isArray(P.pl))for(const q of P.pl){const k=SEEDS[q.k]?q.k:'seed1',sd=SEEDS[k];
@@ -3082,6 +3093,7 @@ function enterVillage(v){
   vExplMark(0,6); // startowa eksploracja wokół spawnu
   vWorkEnsure(); // 🐇 pracownik wraca po wczytaniu świata
   if(VG.hasAssist)vAssistSpawn(); // 🧑‍🌾 asystent wraca po wczytaniu świata
+  vTravelerSync(); // 🧭 podróżnik (dni 35+ / %5)
   vWorkMarks();
   show($('#vHud'),true);show($('#vPrompt'),false);VG.prompt='';
   try{canvas.requestPointerLock();}catch(e){}}
@@ -3148,9 +3160,16 @@ function vnetHostData(c,d){if(!d||typeof d!=='object')return;
         lb:VG.labs.map(l=>[round2(l.x),round2(l.y),round2(l.z)]),
         bx:VG.boxes.map(b=>({x:round2(b.x),y:round2(b.y),z:round2(b.z),in:b.inB?1:0,c:b.cnt})),
         tc:VG.choppedTrees,
-        as:VG.hasAssist?1:0,fr:VG.fruits,f4:VG.floor4?1:0,
+        as:VG.hasAssist?1:0,fr:VG.fruits,f4:VG.floor4?1:0,up:VG.up,
         dy:VG.day,dtm:Math.round(VG.dayT),
-        pl:VG.plants.map(p=>({x:p.x,z:p.z,k:p.k,st:p.st,t:p.t,tm:p.tm,f:p.f,b:p.inB?1:0,h:p.hp,d:Math.round(p.dmgT)}))});}catch(e){}
+        pl:VG.plants.map(p=>({x:p.x,z:p.z,k:p.k,st:p.st,t:p.t,tm:p.tm,f:p.f,b:p.inB?1:0,fl:p.floor||0,h:p.hp,d:Math.round(p.dmgT)}))});}catch(e){}
+      if(d.up&&typeof d.up==='object'){const changed=[]; // 🤝 wspólne ulepszenia: maksimum
+        for(const k in d.up){if(!UPG[k])continue;
+          const nl=Math.max(0,Math.min(UPG[k].max,+d.up[k]||0));
+          if(nl>(VG.up[k]||0)){VG.up[k]=nl;changed.push({k:k,lv:nl});
+            if(k==='map')expandVillage();
+            else if(k==='bunk'){for(const b2 of VG.bunkers)vResizeBunker(b2,bunkerSize());vBuildInterior(W);}}}
+        for(const ch of changed)vnetEv({a:'up',k:ch.k,lv:ch.lv,by:VNET.myId});}
       vnetEv({a:'pjoin',id,nick:pl.nick,color:pl.color});
       toast('🐹 '+pl.nick+' '+T('dołączył do wioski!','joined the village!'),'good');vnetUpdWho();}
     return;}
@@ -3183,7 +3202,7 @@ function joinVillageNet(code,onFail){
   p.on('open',()=>{opened=true;
     const c=p.connect('zparty3d-v'+code.toLowerCase(),{reliable:true});VNET.hostConn=c;
     let ok=false;const to=setTimeout(()=>{if(!ok)fail();},9000);
-    c.on('open',()=>{ok=true;clearTimeout(to);c.send({t:'vjoin',nick:vnetNick(),color:vnetColor()});});
+    c.on('open',()=>{ok=true;clearTimeout(to);c.send({t:'vjoin',nick:vnetNick(),color:vnetColor(),up:VG.up});});
     c.on('data',d=>vnetClientData(d));
     c.on('close',()=>{clearTimeout(to);if(VNET.on&&!VNET.isHost)vnetHostGone();});
     c.on('error',()=>{clearTimeout(to);if(!VNET.vid)fail();});});
@@ -3196,7 +3215,7 @@ function vnetClientData(d){if(!d||typeof d!=='object')return;
     VNET.players={};for(const p of(d.players||[]))VNET.players[p.id]={id:p.id,nick:p.nick,color:p.color,x:0,y:0,z:6,yaw:0};
     showNet('');
     const v={id:d.vid,name:d.name||('Wioska '+VNET.code),multi:true,code:VNET.code};
-    VNET.pending={bl:d.bl||[],bk:d.bk||[],lb:d.lb||[],bx:d.bx||[],tc:d.tc||[],pl:d.pl||[],mapLv:d.mapLv,as:d.as,fr:d.fr||{},f4:d.f4,dy:d.dy,dtm:d.dtm,hot:VG.hot.join(',')};
+    VNET.pending={bl:d.bl||[],bk:d.bk||[],lb:d.lb||[],bx:d.bx||[],tc:d.tc||[],pl:d.pl||[],mapLv:d.mapLv,as:d.as,fr:d.fr||{},f4:d.f4,up:d.up||{},dy:d.dy,dtm:d.dtm,hot:VG.hot.join(',')};
     toast('🏘️ '+T('Dołączono do wioski','Joined village')+' „'+esc(v.name)+'"','good');
     enterVillage(v);
     VG.money=Math.max(0,Math.round(+d.m||0)); // wspólny portfel od hosta
@@ -3316,6 +3335,14 @@ function handleVillMsg(ev){if(!ev||!ev.a)return;
     case 'bunkerResize':{if(!VG.on)break;for(const b of VG.bunkers)vResizeBunker(b,ev.s||bunkerSize());vBuildInterior(W);break;}
     case 'asystAdd':{if(VG.on){VG.hasAssist=true;vAssistSpawn();}break;}
     case 'advFloor4':{if(VG.on){VG.floor4=true;vBuildInterior(W);}break;}
+    case 'up':{ // 🤝 wspólne ulepszenia — ktoś kupił → wszyscy dostają
+      if(VG.on&&VNET.on&&ev.k&&UPG[ev.k]&&ev.by!==VNET.myId){
+        const nl=Math.max(0,Math.min(UPG[ev.k].max,ev.lv||0));
+        if(nl>(VG.up[ev.k]||0)){VG.up[ev.k]=nl;
+          if(ev.k==='map')expandVillage();
+          else if(ev.k==='bunk'){for(const b2 of VG.bunkers)vResizeBunker(b2,bunkerSize());vBuildInterior(W);}
+          toast('⬆️ '+iN(UPG[ev.k])+' — '+T('poziom ','level ')+nl+' · '+T('wspólne ulepszenie','shared upgrade'),'good');}}
+      break;}
     case 'swordTake':{ // miecz zostaje w świecie — każdy gracz może go podnieść
       if(ev.by!==VNET.myId)toast('⚔️ '+vNickOf(ev.by)+' '+T('zdobył miecz!','got the sword!'),'good');break;}}}
 function vElderDist(){const p=VG.p,e=VG.elder;return(p&&e)?Math.hypot(p.x-e.position.x,p.z-e.position.z):99;}
@@ -3421,6 +3448,7 @@ function villageEAction(){ // E: drzewo/parkour, wyjścia, dziadek
       return;}}
   const hk=VG.hand; // 🍽️ zjedz owoc trzymany w ręce (E)
   if(hk&&EAT[hk]&&(VG.inv[hk]||0)>0){vEatFruit(hk);return;}
+  if(vNearTraveler()){openTrav();return;} // 🧭 podróżnik
   if(vElderDist()<3.8){openShop();return;} // dziadek ma priorytet
   if(VG.bunkers.some(bb=>Math.hypot(p.x-(bb.x+bb.size/2),p.z-(bb.z+bb.size/2))<bb.size/2+2)){ // przy bunkerze, nie przy klapie
     toast('🚪 '+T('Wejdź przy CZARNEJ klapie w rogu platformy i kliknij E','Go to the BLACK hatch at the platform corner and press E'));return;}
@@ -3430,7 +3458,7 @@ function vFreeze(){VG.lockExitT=now();INP.keys={};updInp();if(document.pointerLo
 function openShop(){VG.gui='shop';vFreeze();show($('#shopOv'),true);renderShop();AU.gui();}
 function openInv(){VG.gui='inv';vFreeze();show($('#invOv'),true);renderInv();AU.gui();}
 function closeShop(relock){if(!VG.gui&&!relock)return;VG.gui=false;show($('#shopOv'),false);show($('#invOv'),false);
-  show($('#vPauseOv'),false);show($('#labOv'),false);show($('#vElevOv'),false);show($('#vAdvOv'),false);AU.gui();
+  show($('#vPauseOv'),false);show($('#labOv'),false);show($('#vElevOv'),false);show($('#vAdvOv'),false);show($('#vTravOv'),false);AU.gui();
   if(relock&&VG.on){try{canvas.requestPointerLock();}catch(e){}}}
 function openElev(){ // 🛗 winda — wybierz piętro
   if(!VG.on||VG.gui||!(VG.p&&VG.p.inside))return;
@@ -3454,7 +3482,7 @@ function renderAdv(){
     h+='<div class="tag">🧪 Substancja — składnik mutacji nasion (zakładka SEEDS)</div>';
     h+='<div class="tag" style="margin-top:4px">🔵 Barwnik niebieski — przepis jeszcze nieznany…</div>';
   }else{ // SEEDY: nasiono + substancja → nasiono mutant
-    h+='<div class="tag">1 nasiono + 1 🧪 substancja → 🧬 zmutowane nasiono: owoc +5% wartości, roślina +10% szybciej rośnie (lekko neonowa)</div>';
+    h+='<div class="tag">1 nasiono + 1 🧪 substancja → 🧬 zmutowane nasiono: owoc +20% wartości, roślina +15% szybciej rośnie (lekko neonowa)</div>';
     let any=false;
     for(const k of SEED_KEYS){const n=VG.inv[k]||0;if(n<=0)continue;any=true;
       h+='<div class="shRow"><div class="shn">'+iN(ITEMS[k])+'<small>🧪 Substancja ×'+(VG.inv.subst||0)+'</small></div><b>×'+n+'</b><button class="btn sm calm" data-mut="'+k+'"'+((VG.inv.subst||0)>0?'':' disabled')+' style="margin-left:6px">🧬 ZMUTUJ</button></div>';}
@@ -3468,7 +3496,7 @@ function advCraftSub(){const V=VG;
 function advMutate(k){const V=VG;
   if(!(V.inv[k]>0)||!(V.inv.subst>0)){toast('🧬 '+T('Potrzeba nasiona i substancji','Need a seed and substance'),'bad');return;}
   V.inv[k]--;V.inv.subst--;V.inv['m'+k]=(V.inv['m'+k]||0)+1;
-  AU.fanfare();toast('🧬 '+iN(ITEMS['m'+k])+T(' w ekwipunku! Owoc +5% wartości, wzrost +10%',' in inventory! Fruit +5% value, growth +10%'),'good');
+  AU.fanfare();toast('🧬 '+iN(ITEMS['m'+k])+T(' w ekwipunku! Owoc +20% wartości, wzrost +15%',' in inventory! Fruit +20% value, growth +15%'),'good');
   saveVillage();renderAdv();}
 function renderElev(){
   const n=vFloorCount(),cur=vFloorOf(VG.p.y);
@@ -3608,6 +3636,7 @@ function vBuy(act,k,n){
   }else if(act==='up'){const u=UPG[k];if(!u)return;const lv=VG.up[k];if(lv>=u.max)return;const c=u.cost[lv];
     if(VG.money<c){toast(T('Za mało pieniędzy','Not enough money'),'bad');return;}
     vMoneyDelta(-c);VG.up[k]=lv+1;AU.pass();toast('⬆️ '+iN(u)+' — '+T('poziom ','level ')+VG.up[k],'good');
+    vnetAct({a:'up',k:k,lv:VG.up[k],by:VNET.myId}); // 🤝 wspólne ulepszenia
     if(k==='map')expandVillage();
     else if(k==='bunk'){ // rozbudowa istniejących bunkerów + więcej pokoi w środku
       for(const b of VG.bunkers)vResizeBunker(b,bunkerSize());
@@ -4163,10 +4192,13 @@ function alienModel(){const g=new THREE.Group();
   for(const ex of[-.11,.11]){const e2=sph(.05,'#101010',8);e2.position.set(ex,.9,-.26);g.add(e2);}
   const ant=cyl(.02,.02,.3,'#3a5a3a',5);ant.position.y=1.18;g.add(ant);
   g.traverse(o=>{if(o.isMesh)o.castShadow=true;});return g;}
-function alienDmg(){const d=VG.day;return d>=200?30:d>=150?25:d>=100?20:d>=50?10:5;}
+function alienDmg(){const d=VG.day;let dm=d>=200?30:d>=150?25:d>=100?20:d>=50?10:5;
+    if(d>31)dm=Math.round(dm*1.15); // fale po 31. dniu o 15% trudniejsze
+    return dm;}
 function startRaid(day){if(RAID.active)return;RAID.active=true;
   const n=Math.min(9,3+Math.floor(day/10));
-  const ah=day>=100?400:200; // kosmici mocniejsi po 100 dniu
+  let ah=day>=100?400:200; // kosmici mocniejsi po 100 dniu
+    if(day>31)ah=Math.round(ah*1.15); // fale po 31. dniu o 15% więcej HP
   const r=W.radial-4;
   for(let i=0;i<n;i++){const a=i/n*Math.PI*2;
     RAID.aliens.push({x:Math.cos(a)*r,z:Math.sin(a)*r,y:0,hp:ah,hitT:0,siege:0,inIn:false,i});}
@@ -4184,7 +4216,9 @@ function vAlienSync(al){ // gość: kosmici od hosta
   vAlienBuildAll();}
 function vAlienRender(){for(const a of RAID.aliens){if(!a.mesh)continue;
   a.mesh.visible=true;const bob=Math.sin(now()*3+a.i)*.12;
-  a.mesh.position.set(a.x,(a.y||vTerrainH(a.x,a.z))+.5+bob,a.z);}}
+  a.mesh.position.set(a.x,(a.y||vTerrainH(a.x,a.z))+.5+bob,a.z);
+  if(VG.p){const dx=VG.p.x-a.x,dz=VG.p.z-a.z;
+    if(dx||dz)a.mesh.rotation.y=Math.atan2(-dx,-dz);}}} // twarz w stronę gracza
 function vRaidHostTick(dt){ // host/solo: AI kosmitów
   if(!RAID.active||!VG.p)return;
   const dmg=alienDmg();
@@ -4232,12 +4266,53 @@ function vRaidHostTick(dt){ // host/solo: AI kosmitów
     else{a.x+=mvx;a.z+=mvz;a.y=0;}
     a.x=clamp(a.x,-W.radial+3,W.radial-3);a.z=clamp(a.z,-W.radial+3,W.radial-3);}}
 const BRCH={t:0,breached:false};
+function vTravelerSync(){ // 🧭 podróżnik: co 5 dni od 35. dnia
+  if(!W||!W.group)return;
+  const want=VG.day>=35&&VG.day%5===0;
+  if(want&&!W.traveler){
+    const g=buildHamster('#9a7a5a','Podróżnik');
+    const bp=box(.5,.6,.3,'#8a5a33');bp.position.set(0,1,.4);g.add(bp); // plecak podróżnika
+    g.scale.setScalar(1.05);g.position.set(-2.5,0,-6.5);
+    g.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+    W.group.add(g);W.traveler=g;
+    if(!VNET.on||VNET.isHost)toast('🧭 '+T('Podróżnik zawitał do wioski! Można u niego craftować','A traveler has arrived! You can craft at him'),'good');
+  }else if(!want&&W.traveler){W.group.remove(W.traveler);W.traveler=null;}}
+function vNearTraveler(){const p=VG.p;if(!p||!W||!W.traveler)return false;
+  if(p.inside||p.park)return false;
+  return Math.hypot(p.x-W.traveler.position.x,p.z-W.traveler.position.z)<2.6;}
+function openTrav(){if(!VG.on||VG.gui)return;if(!vNearTraveler())return;
+  vFreeze();VG.gui='trav';renderTrav();show($('#vTravOv'),true);AU.gui();}
+function renderTrav(){const V=VG;
+  const have=(k,need)=>[V.inv[k]||0,need];
+  const row=(lbl,have,need)=>'<div class="shRow"><div class="shn">'+lbl+'</div><b style="color:'+(have>=need?'#a8e063':'#ff8a7a')+ '">'+ have + '/' + need + '</b></div>';
+  let h='<div class="tag">🧭 Podróżnik przemierza świat i zna sekrety barw. Przychodzi co 5 dni od 35. dnia.</div>';
+  h+=row('🧴 Butelka wody',V.inv.bottle||0,5);
+  h+=row('✴️ Kosmity',vFruitTotal('plant8'),15);
+  h+=row('🕳️ Syngularności',vFruitTotal('plant12'),5);
+  const ok=(V.inv.bottle||0)>=5&&vFruitTotal('plant8')>=15&&vFruitTotal('plant12')>=5;
+  h+='<div class="row"><button class="btn sm acc" data-dye="1"'+(ok?'':' disabled')+'>🔵 WYTWÓRZ BARWNIK NIEBIESKI</button></div>';
+  h+='<div class="tag">🔵 Barwnik niebieski — składnik 🧪 substancji w laboratorium adv (piętro 4)</div>';
+  $('#vTravBody').innerHTML=h;}
+function travTakeFruit(k,nn){ // zdejmij n sztuk: najpierw wspólna pula (MP), potem ekwipunek
+  if(VNET.on){const f=VG.fruits[k]||0,useF=Math.min(f,nn);
+    VG.fruits[k]=f-useF;const rest=nn-useF;
+    if(rest>0)VG.inv[k]=Math.max(0,(VG.inv[k]||0)-rest);
+    vnetAct({a:'fruitGet',c:{[k]:-nn}});}
+  else VG.inv[k]=Math.max(0,(VG.inv[k]||0)-nn);}
+function travCraftDye(){const V=VG;
+  if((V.inv.bottle||0)<5||vFruitTotal('plant8')<15||vFruitTotal('plant12')<5){toast('🧭 '+T('Brak składników…','Missing ingredients…'),'bad');return;}
+  travTakeFruit('plant8',15);travTakeFruit('plant12',5);travTakeFruit('bottle',5);
+  V.inv.dye=(V.inv.dye||0)+1;
+  AU.fanfare();toast('🔵 '+T('Wytworzono barwnik niebieski!','Blue dye crafted!'),'good');
+  saveVillage();renderTrav();}
 function vDayTick(dt){ // dzień/noc + wyzwalacz inwazji
   if(!VG.on)return;
   VG.dayT+=dt;
   const day=Math.floor(VG.dayT/CYC)+1;
   if(day!==VG.day){VG.day=day;
-    if(day%10===0&&(!VNET.on||VNET.isHost))startRaid(day);}
+    if((day%10===0||day===25)&&(!VNET.on||VNET.isHost))startRaid(day); // 25. dzień: nagła fala
+    vTravelerSync(); // 🧭 podróżnik co 5 dni od 35.
+  }
   const phase=VG.dayT%CYC<DAY_LEN?'day':'night';
   if(phase!==VG.phase){VG.phase=phase;
     if(phase==='night')vSkyNight();else vSky(VG.up.map);}}
@@ -4306,6 +4381,9 @@ function vCanPlace(ix,iy,iz){
   $('#labX').onclick=()=>{AU.click();closeShop(true);};
   $('#labCraft').onclick=()=>{AU.click();craftLab();};
   $('#vElevX').onclick=()=>{AU.click();closeShop(true);};
+  $('#vTravX').onclick=()=>{AU.click();closeShop(true);};
+  $('#vTravOv').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.dye){travCraftDye();return;}});
   $('#vAdvX').onclick=()=>{AU.click();closeShop(true);};
   $('#vAdvTabS').onclick=()=>{AU.click();VG.advTab='sub';renderAdv();};
   $('#vAdvTabG').onclick=()=>{AU.click();VG.advTab='seed';renderAdv();};
@@ -4614,6 +4692,9 @@ function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
     u.body.scale.y=.84+(Math.sin(t*2.1)*.5+.5)*.028;
     const dx=p.x-el.position.x,dz=p.z-el.position.z;
     if(Math.hypot(dx,dz)<14)el.rotation.y=Math.atan2(-dx,-dz);}
+  const trv=W?W.traveler:null; // 🧭 podróżnik patrzy na gracza
+  if(trv){const dx=p.x-trv.position.x,dz=p.z-trv.position.z;
+    if(Math.hypot(dx,dz)<12)trv.rotation.y=Math.atan2(-dx,-dz);}
   const asg=VG.assistG; // asystent patrzy na gracza (etykieta tylko pod ziemią)
   if(asg){const dx=p.x-asg.position.x,dz=p.z-asg.position.z;
     if(Math.hypot(dx,dz)<10)asg.rotation.y=Math.atan2(-dx,-dz);
