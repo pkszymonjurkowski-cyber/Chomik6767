@@ -66,6 +66,26 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 #vHud .vDot{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:rgba(255,255,255,.8);box-shadow:0 0 3px #000}
 #vPrompt{position:absolute;bottom:124px;left:50%;transform:translateX(-50%);background:rgba(14,16,22,.68);border:1px solid rgba(255,255,255,.16);padding:8px 18px;border-radius:10px;font-size:14px;letter-spacing:.6px}
 #vHudHint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font-size:12px;opacity:.6;background:rgba(14,16,22,.45);padding:6px 14px;border-radius:8px;white-space:nowrap}
+/* Sterowanie dotykowe: interfejs jest całkowicie ukryty poza telefonami. */
+#vMobile{display:none}
+@media (pointer:coarse) and (max-width:900px){
+  #vHud.mobileVillage #vMobile{display:block;pointer-events:auto}
+  #vHud.mobileVillage #vHudHint,#vHud.mobileVillage .vDot,#vHud.mobileVillage #vExit{display:none}
+  #vHud.mobileVillage #vBar{bottom:138px;max-width:52vw;gap:5px}
+  #vHud.mobileVillage .bSlot{width:46px;height:46px}
+  #vHud.mobileVillage #vPrompt{bottom:210px;max-width:72vw;text-align:center;font-size:12px;padding:6px 10px}
+  .mJoy{position:absolute;left:22px;bottom:28px;width:132px;height:132px;border-radius:50%;background:rgba(5,8,12,.5);border:1px solid rgba(255,255,255,.18);touch-action:none}
+  .mJoy i{position:absolute;left:40px;top:40px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);pointer-events:none;transform:translate(0,0)}
+  .mActions{position:absolute;right:20px;bottom:26px;width:178px;height:215px}
+  .mBtn{position:absolute;width:62px;height:62px;border-radius:50%;border:1px solid rgba(255,255,255,.23);background:rgba(5,8,12,.5);color:#fff;display:flex;align-items:center;justify-content:center;touch-action:manipulation;padding:0;box-shadow:0 3px 13px rgba(0,0,0,.32)}
+  .mBtn:active{background:rgba(5,8,12,.72);transform:scale(.94)}
+  .mBtn .mIcon{font-size:29px;line-height:1;opacity:.5;filter:grayscale(1) brightness(3)}
+  #mJump{right:0;bottom:0} #mInteract{right:72px;bottom:0} #mPlant{right:0;bottom:72px} #mAttack{right:72px;bottom:72px} #mHarvest{right:72px;bottom:144px}
+  #mInventory{position:absolute;right:16px;top:14px;width:54px;height:54px}
+  #mInventory .mIcon{font-size:25px}
+  #vHp,#vSp,#vHg{left:10px;transform:scale(.82);transform-origin:left top}
+  #vHp{top:64px} #vSp{top:108px} #vHg{top:152px}
+}
 .vTabs.sub{margin-bottom:6px}
 .vTabs.sub .vtab{font-size:11px;letter-spacing:2px;padding:9px 0}
 #vBar{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:368px}
@@ -370,6 +390,17 @@ kbd{background:rgba(255,255,255,.15);border-radius:5px;padding:1px 7px;font-fami
   <div id="vPrompt" hidden></div>
   <div id="vBar"></div>
   <div id="vHudHint">WASD — ruch · Shift — sprint · C — kuca · Spacja — skok · F — podnieś/odłóż gracza / królik · T — ekwipunek · E — dziadek / drzewo / bunker · 1-9,0 — przedmiot · X — kilof · V — bunker · G — wyrzuć · M — mapa · LPM — uderz/posadź/postaw · ESC — menu</div>
+  <div id="vMobile" aria-label="Sterowanie mobilne">
+    <div class="mJoy" id="mJoy" aria-label="Joystick ruchu"><i id="mJoyKnob"></i></div>
+    <button class="mBtn" id="mInventory" aria-label="Ekwipunek"><span class="mIcon">🎒</span></button>
+    <div class="mActions">
+      <button class="mBtn" id="mJump" aria-label="Skok"><span class="mIcon">↥</span></button>
+      <button class="mBtn" id="mInteract" aria-label="Interakcja"><span class="mIcon">✋</span></button>
+      <button class="mBtn" id="mPlant" aria-label="Sadzenie" hidden><span class="mIcon">🌱</span></button>
+      <button class="mBtn" id="mAttack" aria-label="Atak" hidden><span class="mIcon">⚔</span></button>
+      <button class="mBtn" id="mHarvest" aria-label="Zbierz roślinę" hidden><span class="mIcon">✦</span></button>
+    </div>
+  </div>
 </div>
 <div id="vMapOv" hidden>
   <div id="vMapBox">
@@ -689,7 +720,8 @@ const G={screen:'menu',myId:null,isHost:false,code:'',players:{},
 let W=null;
 const REMOTES=new Map();   // id -> {grp,cur,tgt,alive,dying}
 const cl={pred:null,lastSnapT:0,frozen:false,gDir:1};
-const INP={f:0,s:0,j:false,yaw:0,pitch:0,rev:false,sprint:false,crouch:false,keys:{}};
+const INP={f:0,s:0,j:false,yaw:0,pitch:0,rev:false,sprint:false,crouch:false,keys:{},touchF:0,touchS:0,touchJ:false};
+function isVillageMobile(){return matchMedia('(pointer:coarse) and (max-width:900px)').matches;}
 const STA={v:10,max:10}; // stamina sprintu: max 10 s biegu, regen 0.5/s (pełna po 20 s)
 function staTick(dt,sprinting,moving){ // zużycie 1/s przy sprincie, regen 0.5/s
   if(sprinting&&moving)STA.v=Math.max(0,STA.v-dt);
@@ -2314,14 +2346,7 @@ addEventListener('keydown',e=>{
     if(e.code==='Escape'&&!e.repeat){openPause();return;}
     if(e.code==='KeyE'&&!e.repeat){villageEAction();return;}
     if(e.code==='KeyT'&&!e.repeat){openInv();return;} // T — ekwipunek
-    if(e.code==='KeyF'&&!e.repeat){ // F: złap królika / weź leżącego gracza / odłóż
-      const p=VG.p;
-      if(W&&W.rabbitMesh&&W.rabbitMesh.visible&&p&&!p.down&&!p.dead&&!p.carriedBy&&Math.hypot(p.x-VRB.x,p.z-VRB.z)<1.5){
-        vnetAct({a:'rabbitCatch',by:VNET.myId});vRabbitCaught();return;}
-      if(p&&!p.down&&!p.dead&&!p.carriedBy&&VNET.on){
-        const lid=vLyingNear();
-        if(lid){vnetAct({a:'carry',id:lid,by:VNET.myId});AU.pass();return;}}
-      if(p&&p.carriedBy){vnetAct({a:'drop',id:p.carriedBy,by:VNET.myId});return;}}
+    if(e.code==='KeyF'&&!e.repeat){villageFAction();return;}
     if(/^Digit(?:[1-9]|0)$/.test(e.code)){const ix=e.code==='Digit0'?9:+e.code.slice(5)-1;VG.hand=VG.hot[ix]||null;return;} // sloty wg kolejności zdobycia
     if(e.code==='KeyX'&&!e.repeat){VG.hand=VG.hot[10]||null;return;} // slot 11
     if(e.code==='KeyG'&&!e.repeat){vDropItem();return;} // 📤 wyrzuć trzymany przedmiot
@@ -2339,12 +2364,20 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>{INP.keys[e.code]=false;updInp();});
 addEventListener('blur',()=>{INP.keys={};updInp();});
 function updInp(){ // WASD = ruch, strzałki = kamera (obsługiwane w pętli), E = trzymanie podnoszenia
-  INP.f=(INP.keys['KeyW']?1:0)-(INP.keys['KeyS']?1:0);
-  INP.s=(INP.keys['KeyD']?1:0)-(INP.keys['KeyA']?1:0);
-  INP.j=!!INP.keys['Space'];
+  INP.f=clamp(((INP.keys['KeyW']?1:0)-(INP.keys['KeyS']?1:0))+INP.touchF,-1,1);
+  INP.s=clamp(((INP.keys['KeyD']?1:0)-(INP.keys['KeyA']?1:0))+INP.touchS,-1,1);
+  INP.j=!!INP.keys['Space']||INP.touchJ;
   INP.rev=!!INP.keys['KeyE'];
   INP.sprint=!!INP.keys['ShiftLeft']||!!INP.keys['ShiftRight']; // Shift = sprint (Ctrl+W zamyka kartę!)
   INP.crouch=!!INP.keys['KeyC'];} // C = kucanie
+function villageFAction(){ // F: złap królika / weź leżącego gracza / odłóż
+  const p=VG.p;
+  if(W&&W.rabbitMesh&&W.rabbitMesh.visible&&p&&!p.down&&!p.dead&&!p.carriedBy&&Math.hypot(p.x-VRB.x,p.z-VRB.z)<1.5){
+    vnetAct({a:'rabbitCatch',by:VNET.myId});vRabbitCaught();return true;}
+  if(p&&!p.down&&!p.dead&&!p.carriedBy&&VNET.on){const lid=vLyingNear();
+    if(lid){vnetAct({a:'carry',id:lid,by:VNET.myId});AU.pass();return true;}}
+  if(p&&p.carriedBy){vnetAct({a:'drop',id:p.carriedBy,by:VNET.myId});return true;}
+  return false;}
 function arrowCam(dt){ // backup kamery strzałkami — działa też bez Pointer Locka
   const r=1.9*dt;
   if(INP.keys['ArrowLeft'])INP.yaw+=r;
@@ -3101,6 +3134,7 @@ function enterVillage(v){
   try{canvas.requestPointerLock();}catch(e){}}
 function exitVillage(){
   if(!VG.on)return;saveVillage();closeShop(false);
+  INP.touchF=INP.touchS=0;INP.touchJ=false;updInp();
   if(document.pointerLockElement)document.exitPointerLock();
   VG.on=false;VG.v=null;VG.p=null;VG.plants=[];VG.blocks=[];VG.elder=null;VG.ghost=null;VG.ring=null;
   VG.boxes=[];VG.workAsg=[];VG.wmarkG=null;VRK.vis=false;VRK.carry={};VRK.carryN=0;VRK.inB=false;VRK.hb=null;
@@ -3367,7 +3401,14 @@ function villageEAction(){ // E: drzewo/parkour, wyjścia, dziadek
       p.park=false;p.x=W.secretTree.x+1.5;p.z=W.secretTree.z;p.y=vTerrainH(p.x,p.z);p.vy=0;p.vx=p.vz=0;
       toast('🌲 '+T('Wróciłeś do wioski','Back to the village'));return;}
     toast('🧗 '+T('Przejdź parkour do karty i miecza!','Complete the parkour for the card and sword!'));return;}
-  if(p.inside){ // lab / skrzynka / owoce / asystent / wyjście
+  if(p.inside){ // 🚪 wyjście (najwyższy priorytet) / lab / skrzynka / owoce / asystent
+    if(W&&W.bunkerExit&&vFloorOf(p.y)===0&&Math.hypot(p.x-W.bunkerExit.x,p.z-W.bunkerExit.z)<2.6){
+      p.inside=false;
+      const hb=(vNearestBunker(W.bunkerExit.x,W.bunkerExit.z)||V.bunkers[0]);
+      if(hb){p.x=hb.hatch.x+.9;p.z=hb.hatch.z+.9;p.y=hb.h+1.3;}
+      else{p.x=W.bunkerExit.x;p.z=W.bunkerExit.z;p.y=0;}
+      p.vy=0;p.vx=p.vz=0;
+      toast('🚪 '+T('Wróciłeś na powierzchnię','Back on the surface'));return;}
     const lb=vNearLab();
     if(lb){openLab();return;}
     if(vBoxCollect())return;
@@ -3393,13 +3434,6 @@ function villageEAction(){ // E: drzewo/parkour, wyjścia, dziadek
      if(pl){toast('🌿 '+T('Ta roślinka nie ma jeszcze owoców','This plant has no fruit yet'));return;}}
     // 🧑‍🌾 asystent — sklep jak u dziadka
     if(VG.assistG&&Math.hypot(p.x-VG.assistG.position.x,p.z-VG.assistG.position.z)<3.8){openShop();return;}
-    if(W&&W.bunkerExit&&vFloorOf(p.y)===0&&Math.hypot(p.x-W.bunkerExit.x,p.z-W.bunkerExit.z)<2.6){
-      p.inside=false;
-      const hb=(vNearestBunker(W.bunkerExit.x,W.bunkerExit.z)||V.bunkers[0]);
-      if(hb){p.x=hb.hatch.x+.9;p.z=hb.hatch.z+.9;p.y=hb.h+1.3;}
-      else{p.x=W.bunkerExit.x;p.z=W.bunkerExit.z;p.y=0;}
-      p.vy=0;p.vx=p.vz=0;
-      toast('🚪 '+T('Wróciłeś na powierzchnię','Back on the surface'));return;}
     toast('🚪 '+(vFloorOf(p.y)===0?T('Wyjście w rogu bunkra','Exit at the bunker corner'):T('Wejdź windą na piętro 0 — tam jest wyjście','Take the elevator to floor 0 — the exit is there')));return;}
   if(W&&W.secretTree&&Math.hypot(p.x-W.secretTree.x,p.z-W.secretTree.z)<2.4){ // tajemnicze drzewo
     p.park=true;p.x=W.pkExit.x;p.z=W.pkExit.z;p.y=W.pkExit.y+.6;p.vy=0;p.vx=p.vz=0;
@@ -3968,6 +4002,21 @@ function vCanBunker(ix,iz,size){
 function vNearHatch(){const p=VG.p;if(!p)return null;
   for(const b of VG.bunkers){if(Math.hypot(p.x-b.hatch.x,p.z-b.hatch.z)<2.6&&Math.abs(p.y-b.hatch.y)<3.5)return b;}
   return null;}
+function vMobileRefresh(){
+  const hud=$('#vHud');hud.classList.toggle('mobileVillage',VG.on&&isVillageMobile());
+  if(!VG.on||!isVillageMobile()||!VG.p)return;
+  const p=VG.p,h=VG.hand,seed=!!(h&&ITEMS[h]&&ITEMS[h].seed&&VG.inv[h]>0);
+  const fruit=VG.plants.some(pl=>pl.inB===!!p.inside&&!pl.dmgT&&pl.f>0&&Math.hypot(pl.x-p.x,pl.z-p.z)<1.7+(SEEDS[pl.k]?.k||1));
+  const rabbit=!!(W&&W.rabbitMesh&&W.rabbitMesh.visible&&Math.hypot(p.x-VRB.x,p.z-VRB.z)<1.5);
+  const context=!!(p.inside||vNearHatch()||vElderDist()<3.8||fruit||rabbit||vNearTraveler()||vNearBox());
+  const interact=$('#mInteract'),plant=$('#mPlant'),attack=$('#mAttack'),harvest=$('#mHarvest');
+  interact.hidden=!context;plant.hidden=!seed;harvest.hidden=!fruit;attack.hidden=!!(h&&h!=='sword'&&VG.inv[h]>0);
+  // Ten sam przycisk "interakcja" automatycznie przełącza się na łapanie królika.
+  const icon=interact.firstElementChild;
+  if(rabbit){icon.textContent='✋';interact.setAttribute('aria-label','Złap królika');}
+  else {icon.textContent='↔';interact.setAttribute('aria-label','Interakcja');}
+  plant.firstElementChild.textContent='⌑';attack.firstElementChild.textContent=h==='sword'?'⚔':'✊';
+}
 // ---- 📦 skrzynka (w pakiecie z pracownikiem) ----
 function vAddBox(x,yc,z,inB){
   if(!W||!W.group)return null; // brak świata (np. stan pośredni) — nic nie stawiaj
@@ -4471,8 +4520,28 @@ function vCanPlace(ix,iy,iz){
     else if(b.dataset.eat){vEatFruit(b.dataset.eat);}});
   $('#sellOne').onclick=()=>vSell();
   $('#sellAll').onclick=()=>vSellAll();
+  // Telefon: joystick i przyciski korzystają z tych samych akcji co klawiatura/mysz.
+  const mobileStop=e=>{e.preventDefault();e.stopPropagation();};
+  const press=(id,fn)=>{const el=$('#'+id);el.addEventListener('pointerdown',e=>{mobileStop(e);fn();});};
+  press('mInventory',()=>{if(VG.on&&!VG.gui)openInv();});
+  press('mInteract',()=>{if(!VG.on||VG.gui)return;const p=VG.p;
+    if(W&&W.rabbitMesh&&W.rabbitMesh.visible&&p&&Math.hypot(p.x-VRB.x,p.z-VRB.z)<1.5)villageFAction();else villageEAction();});
+  press('mPlant',()=>{if(VG.on&&!VG.gui)window.dispatchEvent(new MouseEvent('mousedown',{button:0,bubbles:true}));});
+  press('mAttack',()=>{if(VG.on&&!VG.gui)window.dispatchEvent(new MouseEvent('mousedown',{button:0,bubbles:true}));});
+  press('mHarvest',()=>{if(VG.on&&!VG.gui)villageEAction();});
+  const jump=$('#mJump');
+  jump.addEventListener('pointerdown',e=>{mobileStop(e);INP.touchJ=true;updInp();});
+  for(const type of['pointerup','pointercancel','pointerleave'])jump.addEventListener(type,e=>{mobileStop(e);INP.touchJ=false;updInp();});
+  const joy=$('#mJoy'),knob=$('#mJoyKnob');let joyId=null;
+  const clearJoy=()=>{joyId=null;INP.touchF=INP.touchS=0;knob.style.transform='translate(0,0)';updInp();};
+  const moveJoy=e=>{if(e.pointerId!==joyId)return;const r=joy.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),lim=r.width*.31;
+    const d=Math.hypot(dx,dy)||1,x=Math.min(lim,d)*dx/d,y=Math.min(lim,d)*dy/d;
+    INP.touchS=x/lim;INP.touchF=-y/lim;knob.style.transform='translate('+x+'px,'+y+'px)';updInp();};
+  joy.addEventListener('pointerdown',e=>{if(!isVillageMobile())return;mobileStop(e);joyId=e.pointerId;joy.setPointerCapture(e.pointerId);moveJoy(e);});
+  joy.addEventListener('pointermove',moveJoy);
+  for(const type of['pointerup','pointercancel','lostpointercapture'])joy.addEventListener(type,clearJoy);
   addEventListener('mousedown',e=>{
-    if(!VG.on||VG.gui||!pointerLocked||!VG.p)return;
+    if(!VG.on||VG.gui||(!pointerLocked&&!isVillageMobile())||!VG.p)return;
     if(VG.p.down||VG.p.dead||VG.p.carriedBy)return; // leżący/noszony nie działa
     const aim=vAim();
     if(e.button===2){if(aim&&aim.block){
@@ -4731,6 +4800,7 @@ function syncHot(){ // pasek w kolejności zdobycia przedmiotów
     if(!has&&inHot)VG.hot=VG.hot.filter(x=>x!==k);}}
 function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
   const p=VG.p;if(!p||!W)return;
+  vMobileRefresh();
   arrowCam(dt);
   camera.position.set(p.x,p.y+(p.carriedBy?.55:(INP.crouch&&!VG.gui?1.15:1.52)),p.z);camera.rotation.order='YXZ';camera.rotation.set(INP.pitch,INP.yaw,0);
   VM.grp.visible=false;
