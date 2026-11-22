@@ -69,6 +69,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 /* Sterowanie dotykowe: interfejs jest całkowicie ukryty poza telefonami. */
 #vMobile{display:none}
 @media (pointer:coarse) and (max-width:900px){
+  #c3d{touch-action:none}
+  /* Wszystkie okna są czytelne, ale nie zasłaniają całego widoku na telefonie. */
+  .ov .panel{transform:scale(.86);transform-origin:center;max-height:96vh;overflow:auto}
+  .ov .shopP{width:min(92vw,380px);padding:16px 17px}
+  .ov .shopTop{margin-bottom:9px;font-size:12px}
+  .ov .vTabs{gap:5px;margin-bottom:10px}
+  .ov .vTabs .vtab{font-size:10px;letter-spacing:1.5px;padding:8px 0}
+  .ov .shRow{padding:7px 9px;margin:5px 0;font-size:12px}
+  .ov .btn{padding:9px 14px;font-size:13px}
   #vHud.mobileVillage #vMobile{display:block;pointer-events:auto}
   #vHud.mobileVillage #vHudHint,#vHud.mobileVillage .vDot,#vHud.mobileVillage #vExit{display:none}
   #vHud.mobileVillage #vBar{bottom:138px;max-width:52vw;gap:5px}
@@ -2332,7 +2341,16 @@ let pointerLocked=false,chatOpen=false;
 document.addEventListener('pointerlockchange',()=>{pointerLocked=document.pointerLockElement===canvas;
   // ESC (jedno wciśnięcie) — utrata blokady w grze otwiera menu pauzy
   if(!pointerLocked&&VG.on&&!VG.gui&&now()-(VG.lockExitT||0)>.4)openPause();});
-canvas.addEventListener('click',()=>{if((G.inGame||(VG.on&&!VG.gui))&&!chatOpen&&!pointerLocked){canvas.requestPointerLock();blurAll();}});
+canvas.addEventListener('click',()=>{if(!isVillageMobile()&&(G.inGame||(VG.on&&!VG.gui))&&!chatOpen&&!pointerLocked){canvas.requestPointerLock();blurAll();}});
+// Na telefonie przeciąganie palcem po świecie obraca kamerę. Przyciski mają własne
+// nasłuchiwanie i zatrzymują zdarzenie, więc nie poruszą widokiem podczas klikania.
+let touchCamId=null,touchCamX=0,touchCamY=0;
+canvas.addEventListener('pointerdown',e=>{if(!isVillageMobile()||!VG.on||VG.gui||e.pointerType!=='touch')return;
+  touchCamId=e.pointerId;touchCamX=e.clientX;touchCamY=e.clientY;canvas.setPointerCapture(e.pointerId);e.preventDefault();});
+canvas.addEventListener('pointermove',e=>{if(e.pointerId!==touchCamId)return;
+  const dx=e.clientX-touchCamX,dy=e.clientY-touchCamY;touchCamX=e.clientX;touchCamY=e.clientY;
+  const sn=.0042*OPT.sens/100;INP.yaw-=dx*sn;INP.pitch=clamp(INP.pitch-dy*sn,-1.45,1.45);e.preventDefault();});
+for(const type of['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,e=>{if(e.pointerId===touchCamId)touchCamId=null;});
 addEventListener('mousemove',e=>{if(!pointerLocked)return;
   const sn=.0024*OPT.sens/100;INP.yaw-=e.movementX*sn;INP.pitch=clamp(INP.pitch-e.movementY*sn,-1.45,1.45);});
 addEventListener('mousedown',e=>{if(e.button===0&&pointerLocked&&G.inGame&&G.phase==='play'&&G.meAlive&&!chatOpen){
@@ -4523,7 +4541,8 @@ function vCanPlace(ix,iy,iz){
   // Telefon: joystick i przyciski korzystają z tych samych akcji co klawiatura/mysz.
   const mobileStop=e=>{e.preventDefault();e.stopPropagation();};
   const press=(id,fn)=>{const el=$('#'+id);el.addEventListener('pointerdown',e=>{mobileStop(e);fn();});};
-  press('mInventory',()=>{if(VG.on&&!VG.gui)openInv();});
+  // Dokładnie zachowuje się jak T: otwiera ekwipunek, a przy otwartym GUI je zamyka.
+  press('mInventory',()=>{if(!VG.on)return;if(VG.gui)closeShop(true);else openInv();});
   press('mInteract',()=>{if(!VG.on||VG.gui)return;const p=VG.p;
     if(W&&W.rabbitMesh&&W.rabbitMesh.visible&&p&&Math.hypot(p.x-VRB.x,p.z-VRB.z)<1.5)villageFAction();else villageEAction();});
   press('mPlant',()=>{if(VG.on&&!VG.gui)window.dispatchEvent(new MouseEvent('mousedown',{button:0,bubbles:true}));});
