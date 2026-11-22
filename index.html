@@ -438,6 +438,20 @@ kbd{background:rgba(255,255,255,.15);border-radius:5px;padding:1px 7px;font-fami
     <div class="row"><button class="btn sm acc" id="labCraft" disabled>SKRAFTUJ</button></div>
   </div>
 </div>
+<div id="vElevOv" class="ov" hidden>
+  <div class="panel shopP">
+    <div class="shopTop"><span>🛗 WINDA</span><button class="btn sm ghost" id="vElevX">✕</button></div>
+    <div id="vElevBtns"></div>
+    <div class="tag" style="margin-top:6px">Wybierz piętro</div>
+  </div>
+</div>
+<div id="vAdvOv" class="ov" hidden>
+  <div class="panel labP">
+    <div class="shopTop"><span>🧪 LABORATORIUM ADV</span><button class="btn sm ghost" id="vAdvX">✕</button></div>
+    <div class="vTabs"><button class="btn calm vtab sel" id="vAdvTabS">SUBSTANCJA</button><button class="btn calm vtab" id="vAdvTabG">SEEDS</button></div>
+    <div id="vAdvBody"></div>
+  </div>
+</div>
 
 <!-- LOBBY -->
 <div id="lobbyOv" class="ov dim" hidden>
@@ -2568,9 +2582,9 @@ const ITEMS={plant:{n:'🌿 Roślinka',en:'🌿 Plant',sell:40,col:'#5cb85c'},pl
   plant4:{n:'🍓 Truskawka',en:'🍓 Strawberry',sell:800,col:'#ff5a4a'},plant5:{n:'🍇 Winogrona',en:'🍇 Grapes',sell:3000,col:'#a05ad0'},plant6:{n:'💎 Kryształki',en:'💎 Crystals',sell:7000,col:'#66ffe0'},
   plant7:{n:'❤️ Rubiny',en:'❤️ Rubies',sell:15000,col:'#ff3355'},plant8:{n:'✴️ Kosmity',en:'✴️ Cosmic orbs',sell:30000,col:'#7d6bff'},
   plant9:{n:'👑 Korony',en:'👑 Crowns',sell:200000,col:'#ffd700'},plant10:{n:'☄️ Meteory',en:'☄️ Meteors',sell:1000000,col:'#ff8c1a'},
-  plant11:{n:'🐉 Smocze łuski',en:'🐉 Dragon scales',sell:5000000,col:'#ff5a2a'},plant12:{n:'🕳️ Syngularności',en:'🕳️ Singularities',sell:25000000,col:'#6a5ad0'},
-  plant13:{n:'🌠 Galaktyki',en:'🌠 Galaxies',sell:100000000,col:'#ff7ab8'},plant14:{n:'♾️ Nieskończoności',en:'♾️ Infinities',sell:500000000,col:'#a0f2ff'},
-  plant15:{n:'💥 Wybuchy',en:'💥 Big bangs',sell:2500000000,col:'#ffd60a'},
+  plant11:{n:'🐉 Smocze łuski',en:'🐉 Dragon scales',sell:8000000,col:'#ff5a2a'},plant12:{n:'🕳️ Syngularności',en:'🕳️ Singularities',sell:18000000,col:'#6a5ad0'},
+  plant13:{n:'🌠 Galaktyki',en:'🌠 Galaxies',sell:40000000,col:'#ff7ab8'},plant14:{n:'♾️ Nieskończoności',en:'♾️ Infinities',sell:90000000,col:'#a0f2ff'},
+  plant15:{n:'💥 Wybuchy',en:'💥 Big bangs',sell:200000000,col:'#ffd60a'},
   wood:{n:'🟫 Drewno',en:'🟫 Wood',sell:5,buy:10,col:'#a8703d',noSell:true},
   stone:{n:'⬜ Kamień',en:'⬜ Stone',sell:8,buy:15,col:'#9aa0a6',noSell:true},
   brick:{n:'🟥 Cegła',en:'🟥 Brick',sell:10,buy:20,col:'#b5523b',noSell:true},
@@ -2589,6 +2603,22 @@ const ITEMS={plant:{n:'🌿 Roślinka',en:'🌿 Plant',sell:40,col:'#5cb85c'},pl
   asyst:{n:'🧑‍🌾 Asystent',en:'🧑‍🌾 Assistant',buy:20000,assistant:true,noSell:true}};
 for(const k of SEED_KEYS)ITEMS[k]={n:SEEDS[k].n,en:SEEDS[k].en,sell:Math.round(SEEDS[k].cost/2),seed:true,col:SEEDS[k].sc,noSell:true}; // nasionek nie można sprzedawać
 const EAT={plant:30,plant2:60,plant3:90,plant4:150,plant5:240,plant6:300,plant7:400,plant8:9999,plant9:9999,plant10:9999,plant11:9999,plant12:9999,plant13:9999,plant14:9999,plant15:9999}; // 🍽️ jedzenie owoców — kosmiczne+ = cały pasek
+// 🧴 składniki zaawansowanego laboratorium (piętro 4)
+ITEMS.bottle={n:'🧴 Butelka wody',en:'🧴 Water bottle',col:'#7ec8e3',noSell:true,ing:true};
+ITEMS.dye={n:'🔵 Barwnik niebieski',en:'🔵 Blue dye',col:'#1e90ff',noSell:true,ing:true};
+ITEMS.subst={n:'🧪 Substancja',en:'🧪 Substance',col:'#39ff14',noSell:true,ing:true};
+// 🧬 mutacje nasion — generowane: nasiono + substancja → nasiono mutant (+5% wartości owocu, +10% szybszy wzrost, neon)
+const MUT_KEYS=[];
+for(const k of SEED_KEYS){
+  const s=SEEDS[k],base=s.n.replace(/^\S+\s*/,'');
+  const mid='m'+k,oid='mo'+s.out;
+  SEEDS[mid]={n:'🧬 '+base+' (mut)',en:s.en+' (mut)',cost:0,grow:Math.round(s.grow*.9),ft:Math.round(s.ft*.9),max:s.max,out:oid,k:s.k,sc:s.sc,c1:s.c1,c2:s.c2,c3:s.c3,fl:s.fl,fr:s.fr,vb:k,mut:true};
+  ITEMS[mid]={n:'🧬 '+base+' (mut)',en:'🧬 '+base+' (mut)',seed:true,col:s.sc,noSell:true};
+  const fo=ITEMS[s.out];
+  ITEMS[oid]={n:'🧬 '+fo.n.replace(/^\S+\s*/,'')+' (mut)',en:'🧬 mutated',sell:Math.round(fo.sell*1.05),col:fo.col};
+  MUT_KEYS.push(mid);
+}
+HOLD.push(...MUT_KEYS); // zmutowane nasiono trzymasz w ręce i sadzisz jak zwykłe
 const iconBg=k=>ITEMS[k].planks?'repeating-linear-gradient(0deg,#d6a05f 0 6px,#a8733a 6px 8px)':ITEMS[k].col;
 const iconEmoji=k=>ITEMS[k]&&ITEMS[k].n?(ITEMS[k].n.match(/^\S+/)||[''])[0]:''; // ⚔️/🪓/⚒️… z nazwy przedmiotu
 const emptyInv=()=>{const o={};for(const k in ITEMS)o[k]=0;return o;};
@@ -2596,12 +2626,16 @@ const UPG={speed:{n:'👟 Szybkie łapki',en:'👟 Fast paws',d:'+12% prędkośc
   fert:{n:'🧪 Nawóz',en:'🧪 Fertilizer',d:'rośliny rosną 25% szybciej',enD:'plants grow 25% faster',max:3,cost:[200,400,600]},
   price:{n:'🏷️ Targowanie',en:'🏷️ Bargaining',d:'+5% do cen sprzedaży',enD:'+5% sell prices',max:3,cost:[250,500,750]},
   map:{n:'🗺️ Większa mapa',en:'🗺️ Bigger map',d:'łąka się powiększa (+12 promienia)',enD:'meadow expands (+12 radius)',max:3,cost:[2000,4000,7000]},
-  bunk:{n:'🚪 Większy bunker',en:'🚪 Bigger bunker',d:'bunkier rośnie o 2 bloki + dodatkowy pokój w środku (też postawiony)',enD:'bunker grows by 2 blocks + an extra room inside (placed ones too)',max:3,cost:[3000,6000,10000]},
+  bunk:{n:'🛗 Piętra bunkra',en:'🛗 Bunker floors',d:'dodaje piętra pod bunkerem (0 → 4, winda na każdym) · rozmiar bez zmian',enD:'adds floors under the bunker (0 → 4, elevator on each) · size unchanged',max:3,cost:[3000,6000,10000]},
   hunger:{n:'🍽️ Powolny głód',en:'🍽️ Slow hunger',d:'głód spada o 20% wolniej',enD:'hunger drops 20% slower',max:3,cost:[1000,2500,5000]},
   work:{n:'🐇 Więcej roślinek',en:'🐇 More plants',d:'pracownik zbiera z +1 rośliny',enD:'worker harvests +1 more plant',max:3,cost:[1500,3000,6000]}};
 const iD=o=>o?(LANG==='en'&&o.enD?o.enD:o.d):''; // opis ulepszenia wg języka
 const MAP_BASE=72,MAP_STEP=12; // łąka — pomniejszona (L1/L2/L3 lekko mniejsze)
 const BKY=-30; // wewnętrze bunkra — pod mapą
+const FLOOR_H=7; // odstęp między piętrami bunkra
+const vFloorY=n=>BKY-n*FLOOR_H; // n=0 najwyższe piętro
+const vFloorOf=y=>Math.round((BKY-y)/FLOOR_H); // numer piętra po wysokości: 0=góra, rośnie w dół
+function vFloorCount(){return 1+VG.up.bunk+(VG.up.bunk>=3?1:0);} // lv3 daje od razu piętra 3 i 4
 function vTerrainH(x,z){ // falowany teren: wzgórza i doliny, płasko przy targu
   let h=2.3*Math.sin(x*.085+1.7)+2.1*Math.cos(z*.095+.6)+1.5*Math.sin((x+z)*.055)+1.1*Math.cos(x*.14-z*.11);
   const d=Math.hypot(x,z),f=Math.min(1,Math.max(0,(d-9)/11));
@@ -2610,7 +2644,7 @@ const VG={on:false,v:null,p:null,money:100,inv:emptyInv(),hot:[],up:{speed:0,fer
   gui:false,tab:'buy',bt:'seeds',it:'seeds',sel:null,hand:null,handKey:'',handG:null,ghost:null,ring:null,barKey:'',saveT:0,prompt:'',hpKey:-1,punchT:0,swingT:0,pawsG:null,
   mapOwned:false,mapOpen:false,exGrid:null,exCv:null,exDirty:true,exAcc:0,hgKey:-1,hungWarn:false,boxHintT:0,
   boxes:[],workAsg:[],wmarkG:null,choppedTrees:[],axeMsgT:0,axeMsgHp:0,hasAssist:false,assistG:null,assistTag:null,
-  fruits:{},drops:[],dropIdc:0};
+  fruits:{},drops:[],dropIdc:0,saveGuest:false,floor4:false,advTab:'sub'};
 const HUN={v:367,max:367}; // 🍗 pasek głodu: pełny → 0 zajmuje 6 min 7 s (367 s); sprint 2× szybciej
 const EXCS=4,EXN=55,EXO=27; // siatka eksploracji mapy (komórka 4, pokrywa ±110)
 const VRAY=new THREE.Raycaster();
@@ -2678,6 +2712,21 @@ function villageScenery(w,seed,level){
     const cm=carrotModel();cm.position.set(cx,vTerrainH(cx,cz),cz);
     cm.traverse(o=>{if(o.isMesh)o.castShadow=true;});
     w.carrots.push({x:cx,z:cz,mesh:cm,t:0});g.add(cm);}
+  // 🧴 butelki z wodą przy borderze — max 10, odnawiane co 400 s, cicho (bez komunikatów i bez mapy)
+  w.bottles=[];
+  for(let i=0;i<10;i++){const a=R()*Math.PI*2,r=rad-3-R()*5;
+    const bx2=Math.cos(a)*r,bz2=Math.sin(a)*r;
+    const bm=new THREE.Group();
+    const body=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,.24,10),new THREE.MeshLambertMaterial({color:'#7ec8e3',transparent:true,opacity:.85}));
+    body.position.y=.13;bm.add(body);
+    const neck=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.08,8),new THREE.MeshLambertMaterial({color:'#e8f4ff'}));
+    neck.position.y=.29;bm.add(neck);
+    const cap=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.03,8),new THREE.MeshLambertMaterial({color:'#2a6a8f'}));
+    cap.position.y=.34;bm.add(cap);
+    bm.position.set(bx2,vTerrainH(bx2,bz2),bz2);
+    bm.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+    g.add(bm);
+    w.bottles.push({x:bx2,z:bz2,mesh:bm,t:0});}
   return g;}
 function buildVillageWorld(seed,level){
   const w={group:new THREE.Group(),boxes:[],killY:-40,gDir:1,radial:MAP_BASE+MAP_STEP*level+1.5,seed:seed};
@@ -2730,33 +2779,10 @@ function buildVillageWorld(seed,level){
   swg.position.set(PK[7][0]-1.5,PK[7][1]+1.3,PK[7][2]+1);
   swg.traverse(o=>{if(o.isMesh)o.castShadow=true;});
   w.group.add(swg);w.swordMesh=swg;w.swordPos={x:PK[7][0]-1.5,y:PK[7][1]+1.3,z:PK[7][2]+1};
-  // wewnętrze bunkra — POD mapą, zamknięty pokój (WSPÓLNE dla wszystkich bunkerów)
+  // wewnętrze bunkra — POD mapą; rośnie z ulepszeniem (vBuildInterior przebudowuje całość)
   const bi=new THREE.Group();bi.position.set(0,BKY,0);bi.visible=true;
-  const flr=box(14,.5,14,'#5a5f68');flr.position.y=-.25;flr.userData.inB=true;bi.add(flr); // podłoga — stawiasz lab i sadzisz wszędzie
-  const ceil=new THREE.Mesh(new THREE.BoxGeometry(14.6,.5,14.6),new THREE.MeshBasicMaterial({color:'#9aa0a6'}));ceil.position.y=5.5;bi.add(ceil); // szary sufit bez tekstury
-  const soil=box(7,.16,14,'#4a3018');soil.position.set(-3.5,.08,0);soil.userData.inB=true;bi.add(soil); // gleba na PÓŁ pokoju
-  const smat=stoneMat();
-  const smatBasic=new THREE.MeshBasicMaterial({map:smat.map}); // szara tekstura bez odcieni światła
-  for(const[wx,wz,ww,wd]of[[0,-7,14,.6],[0,7,14,.6],[-7,0,.6,14],[7,0,.6,14]]){
-    const wl=new THREE.Mesh(new THREE.BoxGeometry(ww,5.5,wd),smatBasic);wl.position.set(wx,2.75,wz);bi.add(wl);} // wyższe ściany
-  const lt=new THREE.PointLight(0xffd9a0,1.3,26);lt.position.set(0,3.4,0);bi.add(lt); // lampa wyżej
-  const amb=new THREE.AmbientLight(0xd8d2c4,.55);bi.add(amb); // neutralne światło — zabija zielony odcień pod ziemią
-  bi.traverse(o=>{if(o.isMesh)o.receiveShadow=true;});
-  w.group.add(bi);w.bunkerIn=bi;w.bunkerExit={x:5.6,y:BKY,z:5.6};
-  // 🚪 drzwi z napisem EXIT w rogu bunkra (wyjście na powierzchnię)
-  const exg=new THREE.Group();exg.position.set(6.55,0,5.6);exg.rotation.y=-Math.PI/2;
-  const exf=box(1.5,2.5,.12,'#4a3118');exf.position.y=1.25;exg.add(exf);
-  const exd=box(1.2,2.3,.14,'#6e4426');exd.position.set(0,1.15,.03);exg.add(exd);
-  const exh=sph(.06,'#c9a227');exh.position.set(.42,1.1,.13);exg.add(exh);
-  bi.add(exg);
-  const exs=makeLabel();exs.userData.set('🚪 EXIT','#7dff8a');exs.scale.set(2.2,.83,1);
-  exs.position.set(6.2,3.15,5.6);bi.add(exs);w.exitLbl=exs;
-  // kolizje wnętrza: podłoga + sufit (wyżej) + ściany (wyższe) — niczym nie przejdziesz
-  w.boxes.push({x:0,y:BKY-.25,z:0,hx:7,hy:.25,hz:7});
-  w.boxes.push({x:0,y:BKY+5.6,z:0,hx:7.3,hy:.25,hz:7.3});
-  for(const[wx,wz,ww,wd]of[[0,-7,14,.6],[0,7,14,.6],[-7,0,.6,14],[7,0,.6,14]]){
-    w.boxes.push({x:wx,y:BKY+2.75,z:wz,hx:ww/2,hy:2.75,hz:wd/2});}
-  vBuildInterior(w); // pokoje z przejściami (liczba wg największego bunkra)
+  w.group.add(bi);w.bunkerIn=bi;w.roomBoxRefs=[];
+  vBuildInterior(w); // pokój + pokoje z ziemią + drzwi EXIT — skalowane największym bunkrem
   addBoxTo(w,0,.8,-6,.5,.8,.5,'#000',false);
   addBoxTo(w,2.6,.5,-6.4,1.1,.5,.5,'#000',false);
   w.customGround=(p,gDir)=>{if(VG.p&&VG.p.inside)return; // pod ziemią teren nie przyciąga
@@ -2769,52 +2795,52 @@ function expandVillage(){
   W.scenery=villageScenery(W,W.seed,lv);W.group.add(W.scenery);
   W.radial=MAP_BASE+MAP_STEP*lv+1.5;vSky(lv);VG.exDirty=true;} // mapa się zmieniła — przerysuj bazę
 function vPlantVisual(pl){
-  const sd=SEEDS[pl.k];
+  const sd=SEEDS[pl.k];const vk=(SEEDS[pl.k]&&SEEDS[pl.k].vb)||pl.k;
   while(pl.body.children.length)pl.body.remove(pl.body.children[0]);pl.fr=[];
   if(pl.st==='seed'){
     pl.body.scale.setScalar(1);
     const mnd=cyl(.22,.3,.11,'#6b4a2b',14);mnd.position.y=.055;pl.body.add(mnd); // kopczyk ziemi — wspólny
-    if(pl.k==='seed1'){ // 🌱 złote ziarno z listkiem
+    if(vk==='seed1'){ // 🌱 złote ziarno z listkiem
       const s1=sph(.075,sd.sc);s1.scale.set(.8,1.15,.8);s1.position.y=.17;pl.body.add(s1);
       const l1=sph(.03,'#4fae52');l1.position.set(.03,.26,0);pl.body.add(l1);
-    }else if(pl.k==='seed2'){ // 🌼 srebrny stożek z białą czubkiem
+    }else if(vk==='seed2'){ // 🌼 srebrny stożek z białą czubkiem
       const s1=cyl(.012,.07,.17,sd.sc,8);s1.position.y=.19;pl.body.add(s1);
       const tip=sph(.028,'#ffffff');tip.position.y=.285;pl.body.add(tip);
-    }else if(pl.k==='seed3'){ // 🌟 fasolka — podłużna i pochylona
+    }else if(vk==='seed3'){ // 🌟 fasolka — podłużna i pochylona
       const s1=sph(.07,sd.sc);s1.scale.set(.6,1.5,.6);s1.rotation.z=.4;s1.position.set(.03,.2,0);pl.body.add(s1);
-    }else if(pl.k==='seed4'){ // 🍓 czerwone ziarenko z listkiem
+    }else if(vk==='seed4'){ // 🍓 czerwone ziarenko z listkiem
       const s1=sph(.08,'#ff5a4a');s1.scale.set(1,.95,.95);s1.position.y=.15;pl.body.add(s1);
       const lf=sph(.032,'#4fae52');lf.scale.set(1.3,.6,1.3);lf.position.y=.245;pl.body.add(lf);
-    }else if(pl.k==='seed5'){ // 🍇 grono — trzy fioletowe kulki
+    }else if(vk==='seed5'){ // 🍇 grono — trzy fioletowe kulki
       for(let i=0;i<3;i++){const g2=sph(.05,sd.fr);g2.position.set((i-1)*.055,.14+i*.05,0);pl.body.add(g2);}
-    }else if(pl.k==='seed6'){ // 💎 kryształowy odłamek + mały obok
+    }else if(vk==='seed6'){ // 💎 kryształowy odłamek + mały obok
       const s1=cyl(.008,.055,.2,sd.fr,5);s1.position.y=.2;pl.body.add(s1);
       const s2=cyl(.006,.04,.13,sd.sc,5);s2.position.set(.06,.15,.02);s2.rotation.z=-.3;pl.body.add(s2);
-    }else if(pl.k==='seed7'){ // 🔥 rubin + mniejszy
+    }else if(vk==='seed7'){ // 🔥 rubin + mniejszy
       const s1=cyl(.01,.07,.18,'#ff3355',4);s1.position.y=.2;pl.body.add(s1);
       const s2=cyl(.008,.05,.12,'#ff8aa5',4);s2.position.set(-.06,.14,0);s2.rotation.z=.3;pl.body.add(s2);
-    }else if(pl.k==='seed9'){ // 👑 mini korona
+    }else if(vk==='seed9'){ // 👑 mini korona
       const s1=cyl(.05,.06,.05,'#e8c34a',8);s1.position.y=.17;pl.body.add(s1);
       for(let i=0;i<4;i++){const sp=cyl(.008,.02,.09,'#ffd700',4);
         sp.position.set(Math.cos(i*1.57)*.045,.25,Math.sin(i*1.57)*.045);pl.body.add(sp);}
-    }else if(pl.k==='seed10'){ // ☄️ meteoryt — szara bryła z żarem
+    }else if(vk==='seed10'){ // ☄️ meteoryt — szara bryła z żarem
       const s1=sph(.07,'#3a3f4a');s1.scale.set(1.15,.9,1);s1.position.y=.16;pl.body.add(s1);
       const s2=sph(.03,'#ff6a3d');s2.position.set(.04,.17,.05);pl.body.add(s2);
-    }else if(pl.k==='seed11'){ // 🐉 smocze jajko z plamkami
+    }else if(vk==='seed11'){ // 🐉 smocze jajko z plamkami
       const s1=sph(.075,'#ff5a2a');s1.scale.set(.9,1.25,.9);s1.position.y=.19;pl.body.add(s1);
       const s2=sph(.02,'#7a2618');s2.position.set(.04,.24,.05);pl.body.add(s2);
       const s3=sph(.018,'#7a2618');s3.position.set(-.04,.15,.04);pl.body.add(s3);
-    }else if(pl.k==='seed12'){ // 🕳️ mini czarna dziura z dyskiem
+    }else if(vk==='seed12'){ // 🕳️ mini czarna dziura z dyskiem
       const s1=sph(.06,'#14141f');s1.position.y=.18;pl.body.add(s1);
       const r1=cyl(.1,.1,.012,'#6a5ad0',16);r1.rotation.x=Math.PI/2;r1.position.y=.18;pl.body.add(r1);
-    }else if(pl.k==='seed13'){ // 🌠 asteroida z ogonem
+    }else if(vk==='seed13'){ // 🌠 asteroida z ogonem
       const s1=sph(.06,'#ff7ab8');s1.position.set(.04,.2,0);pl.body.add(s1);
       const t1=sph(.035,'#7ee7ff');t1.scale.set(2.2,.7,.7);t1.position.set(-.05,.15,0);pl.body.add(t1);
       const t2=sph(.02,'#ffffff');t2.position.set(-.12,.13,0);pl.body.add(t2);
-    }else if(pl.k==='seed14'){ // ♾️ nieskończoność — dwie kulki
+    }else if(vk==='seed14'){ // ♾️ nieskończoność — dwie kulki
       const s1=sph(.05,'#7ee7ff');s1.position.set(-.045,.17,0);pl.body.add(s1);
       const s2=sph(.05,'#a0f2ff');s2.position.set(.045,.17,0);pl.body.add(s2);
-    }else if(pl.k==='seed15'){ // 💥 iskra wielkiego wybuchu
+    }else if(vk==='seed15'){ // 💥 iskra wielkiego wybuchu
       const s1=sph(.06,'#ffd60a');s1.position.y=.18;pl.body.add(s1);
       for(let i=0;i<4;i++){const sp=cyl(.006,.018,.1,'#fff2a0',4);
         sp.position.set(Math.cos(i*1.57)*.075,.18,Math.sin(i*1.57)*.075);
@@ -2828,14 +2854,14 @@ function vPlantVisual(pl){
     pl.lab.position.y=.6;
   }else{
     pl.body.scale.setScalar(sd.k);
-    if(pl.k==='seed1'){ // mały krzaczek
+    if(vk==='seed1'){ // mały krzaczek
       const b1=sph(.34,sd.c1);b1.scale.y=.72;b1.position.y=.24;pl.body.add(b1);
       const b2=sph(.24,sd.c2);b2.position.set(.2,.32,.12);pl.body.add(b2);
       const b3=sph(.2,sd.c3);b3.position.set(-.19,.28,-.12);pl.body.add(b3);
       const slots=[[.18,.44,.14],[-.17,.4,-.1]];
       for(let i=0;i<sd.max;i++){const fr=sph(.08,sd.fr);fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=.8;
-    }else if(pl.k==='seed2'){ // malutkie grządko
+    }else if(vk==='seed2'){ // malutkie grządko
       const soil=box(.9,.16,.55,'#6b4a2b');soil.position.y=.08;pl.body.add(soil);
       const r1=box(1,.1,.08,'#a8703d');r1.position.set(0,.19,.3);pl.body.add(r1);
       const r2=box(1,.1,.08,'#a8703d');r2.position.set(0,.19,-.3);pl.body.add(r2);
@@ -2844,7 +2870,7 @@ function vPlantVisual(pl){
       const slots=[[-.28,.44,0],[0,.46,0],[.28,.44,0]];
       for(let i=0;i<sd.max;i++){const fr=sph(.09,sd.fr);fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=.85;
-    }else if(pl.k==='seed3'){ // fasolka
+    }else if(vk==='seed3'){ // fasolka
       const st=cyl(.05,.07,1.05,'#4a8f45',8);st.position.y=.52;pl.body.add(st);
       const lvs=[[.7,.5],[-1.2,.72],[2.4,.92]];
       for(const lv of lvs){const lf=sph(.16,'#5cb85c');lf.scale.set(1.3,.55,.8);lf.position.set(Math.cos(lv[0])*.18,lv[1],Math.sin(lv[0])*.18);lf.rotation.y=-lv[0];pl.body.add(lf);}
@@ -2852,7 +2878,7 @@ function vPlantVisual(pl){
       const slots=[[.18,.5,.1],[-.16,.72,-.08],[.12,.86,-.14],[-.1,.6,.14]];
       for(let i=0;i<sd.max;i++){const fr=sph(.06,sd.fr);fr.scale.set(1.1,2.6,1.1);fr.position.set(slots[i][0],slots[i][1],slots[i][2]);fr.rotation.z=(i%2?1:-1)*.5;pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=1.5;
-    }else if(pl.k==='seed4'){ // truskawka
+    }else if(vk==='seed4'){ // truskawka
       const b1=sph(.42,sd.c1);b1.scale.y=.6;b1.position.y=.2;pl.body.add(b1);
       for(let i=0;i<3;i++){const lf=sph(.12,'#5cb85c');lf.scale.set(1.4,.5,.9);lf.position.set(Math.cos(i*2.1)*.3,.32,Math.sin(i*2.1)*.3);pl.body.add(lf);}
       const fl=sph(.07,sd.fl);fl.position.y=.42;pl.body.add(fl);
@@ -2860,7 +2886,7 @@ function vPlantVisual(pl){
       const slots=[[.34,.2,.16],[-.3,.18,.2],[.05,.16,-.34],[-.12,.2,-.05]];
       for(let i=0;i<sd.max;i++){const fr=sph(.11,sd.fr);fr.scale.set(1,.9,1);fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=.85;
-    }else if(pl.k==='seed5'){ // krzak winogron
+    }else if(vk==='seed5'){ // krzak winogron
       const b1=sph(.5,sd.c1);b1.scale.y=.85;b1.position.y=.48;pl.body.add(b1);
       const b2=sph(.34,sd.c2);b2.position.set(.28,.6,.12);pl.body.add(b2);
       const st=cyl(.04,.05,.5,'#6a5230',6);st.position.y=1.02;pl.body.add(st);
@@ -2869,7 +2895,7 @@ function vPlantVisual(pl){
         for(let j=0;j<3;j++){const g2=sph(.07,sd.fr);g2.position.set((j%2)*.07-.03,-j*.07,j===1?.05:0);cl.add(g2);}
         cl.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(cl);pl.fr.push(cl);}
       pl.lab.position.y=1.5;
-    }else if(pl.k==='seed7'){ // rubinowy krzak — czerwone kryształy
+    }else if(vk==='seed7'){ // rubinowy krzak — czerwone kryształy
       const mnd=cyl(.32,.42,.18,'#4a2530',10);mnd.position.y=.09;pl.body.add(mnd);
       const st=cyl(.05,.06,.65,'#8f2d3f',6);st.position.y=.42;pl.body.add(st);
       for(let i=0;i<4;i++){const cr=cyl(.02,.085,.26+i*.04,'#ff3355',5);
@@ -2878,7 +2904,7 @@ function vPlantVisual(pl){
       const slots=[[.24,.48,.16],[-.22,.44,.14],[.08,.4,-.24],[-.12,.66,-.12],[.18,.72,-.04],[0,.86,.12]];
       for(let i=0;i<sd.max;i++){const fr=cyl(.018,.055,.13,'#ff3355',5);fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=1.35;
-    }else if(pl.k==='seed8'){ // kosmiczny krzak — świecąca kula u góry
+    }else if(vk==='seed8'){ // kosmiczny krzak — świecąca kula u góry
       const mnd=cyl(.3,.4,.16,'#1c1c3c',10);mnd.position.y=.08;pl.body.add(mnd);
       const st=cyl(.04,.05,.85,'#5a5abf',6);st.position.y=.52;pl.body.add(st);
       const orb=sph(.1,'#c9d2ff');orb.position.y=1.02;pl.body.add(orb);
@@ -2886,7 +2912,7 @@ function vPlantVisual(pl){
       const slots=[[.22,.5,.18],[-.2,.46,.14],[.06,.4,-.24],[-.14,.68,-.1],[.2,.74,-.06],[0,.9,.14]];
       for(let i=0;i<sd.max;i++){const fr=sph(.07,'#7d6bff');fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=1.5;
-    }else if(pl.k==='seed9'){ // królewski krzak — purpura ze złotą koroną
+    }else if(vk==='seed9'){ // królewski krzak — purpura ze złotą koroną
       const mnd=cyl(.34,.44,.18,'#3a2a5a',10);mnd.position.y=.09;pl.body.add(mnd);
       const st=cyl(.05,.06,.7,'#6a4fb0',6);st.position.y=.45;pl.body.add(st);
       const b1=sph(.3,'#8a6fd0');b1.scale.y=.8;b1.position.y=.75;pl.body.add(b1);
@@ -2896,7 +2922,7 @@ function vPlantVisual(pl){
       const slots=[[.24,.6,.18],[-.22,.56,.14],[.08,.5,-.24],[-.14,.74,-.1],[.2,.8,-.06],[0,.44,.16]];
       for(let i=0;i<sd.max;i++){const fr=sph(.08,'#ffd700');fr.scale.set(1,1.2,1);fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=1.5;
-    }else if(pl.k==='seed10'){ // meteorowy krzak — ciemna skała z żarem
+    }else if(vk==='seed10'){ // meteorowy krzak — ciemna skała z żarem
       const mnd=cyl(.36,.46,.18,'#22262e',10);mnd.position.y=.09;pl.body.add(mnd);
       const st=cyl(.06,.08,.8,'#3a3f4a',6);st.position.y=.5;pl.body.add(st);
       const b1=sph(.34,'#4a5060');b1.scale.y=.85;b1.position.y=.85;pl.body.add(b1);
@@ -2905,7 +2931,7 @@ function vPlantVisual(pl){
       const slots=[[.26,.62,.2],[-.24,.58,.16],[.1,.52,-.26],[-.16,.8,-.12],[.22,.86,-.08],[0,.98,.14]];
       for(let i=0;i<sd.max;i++){const fr=sph(.075,'#ff8c1a');fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=1.55;
-    }else if(pl.k==='seed11'){ // smoczy krzak — czerwień z kolcami i jajami
+    }else if(vk==='seed11'){ // smoczy krzak — czerwień z kolcami i jajami
       const mnd=cyl(.36,.46,.18,'#5a1f12',10);mnd.position.y=.09;pl.body.add(mnd);
       const st=cyl(.06,.08,.8,'#8f2d1f',6);st.position.y=.5;pl.body.add(st);
       const b1=sph(.36,'#b53a2a');b1.scale.y=.8;b1.position.y=.85;pl.body.add(b1);
@@ -2914,7 +2940,7 @@ function vPlantVisual(pl){
       const slots=[[.26,.6,.2],[-.24,.56,.16],[.1,.5,-.26],[-.16,.8,-.12],[.22,.86,-.08],[0,.98,.14]];
       for(let i=0;i<sd.max;i++){const fr=sph(.075,'#ff6a3d');fr.scale.set(.9,1.25,.9);fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=1.5;
-    }else if(pl.k==='seed12'){ // krzak czarnej dziury — ciemny z fioletowym dyskiem
+    }else if(vk==='seed12'){ // krzak czarnej dziury — ciemny z fioletowym dyskiem
       const mnd=cyl(.36,.46,.18,'#0a0a12',10);mnd.position.y=.09;pl.body.add(mnd);
       const st=cyl(.05,.07,.85,'#2a2a3a',6);st.position.y=.52;pl.body.add(st);
       const b1=sph(.32,'#14141f');b1.scale.y=.8;b1.position.y=.85;pl.body.add(b1);
@@ -2922,7 +2948,7 @@ function vPlantVisual(pl){
       const slots=[[.26,.6,.2],[-.24,.56,.16],[.1,.5,-.26],[-.16,.78,-.12],[.22,.84,-.08],[0,.42,.16]];
       for(let i=0;i<sd.max;i++){const fr=sph(.07,'#9a7dff');fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=1.55;
-    }else if(pl.k==='seed13'){ // mgławicowy krzak — różowe i błękitne chmury
+    }else if(vk==='seed13'){ // mgławicowy krzak — różowe i błękitne chmury
       const mnd=cyl(.36,.46,.18,'#3a1f5f',10);mnd.position.y=.09;pl.body.add(mnd);
       const st=cyl(.05,.06,.8,'#7a4fb0',6);st.position.y=.5;pl.body.add(st);
       for(let i=0;i<3;i++){const b1=sph(.22,i%2?'#ff7ab8':'#7ee7ff');b1.scale.y=.7;
@@ -2930,7 +2956,7 @@ function vPlantVisual(pl){
       const slots=[[.26,.6,.2],[-.24,.56,.16],[.1,.5,-.26],[-.16,.78,-.12],[.22,.86,-.08],[0,.42,.16]];
       for(let i=0;i<sd.max;i++){const fr=sph(.07,'#ff9ec4');fr.scale.set(1,.7,1);fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=1.5;
-    }else if(pl.k==='seed14'){ // krzak nieskończoności — kryształowa ósemka
+    }else if(vk==='seed14'){ // krzak nieskończoności — kryształowa ósemka
       const mnd=cyl(.36,.46,.18,'#1f5a64',10);mnd.position.y=.09;pl.body.add(mnd);
       const st=cyl(.05,.06,.8,'#2a6a75',6);st.position.y=.5;pl.body.add(st);
       const o1=sph(.16,'#7ee7ff');o1.position.set(-.12,.85,0);pl.body.add(o1);
@@ -2938,7 +2964,7 @@ function vPlantVisual(pl){
       const slots=[[.26,.6,.2],[-.24,.56,.16],[.1,.5,-.26],[-.16,.78,-.12],[.22,.86,-.08],[0,.42,.16]];
       for(let i=0;i<sd.max;i++){const fr=cyl(.02,.055,.13,'#a0f2ff',5);fr.position.set(slots[i][0],slots[i][1],slots[i][2]);pl.body.add(fr);pl.fr.push(fr);}
       pl.lab.position.y=1.55;
-    }else if(pl.k==='seed15'){ // krzak wielkiego wybuchu — złoty rdzeń z promieniami
+    }else if(vk==='seed15'){ // krzak wielkiego wybuchu — złoty rdzeń z promieniami
       const mnd=cyl(.36,.46,.18,'#8f6a1f',10);mnd.position.y=.09;pl.body.add(mnd);
       const st=cyl(.06,.08,.8,'#b8862e',6);st.position.y=.5;pl.body.add(st);
       const core=sph(.22,'#ffd60a');core.position.y=.95;pl.body.add(core);
@@ -2958,14 +2984,14 @@ function vPlantVisual(pl){
       pl.lab.position.y=1.3;
     }
   }
-  pl.body.traverse(o=>{if(o.isMesh)o.castShadow=true;});}
-function vNewPlant(x,z,k,st,t,tm,f,inB){
-  const pl={x,z,k,st,t,tm,f,inB:!!inB,hp:3,dmgT:0,g:new THREE.Group(),body:new THREE.Group(),lab:makeLabel(),fr:[]};
-  pl.g.position.set(x,(pl.inB?BKY:vTerrainH(x,z)+(vDirtAt(x,z)?.5:0)),z);pl.g.add(pl.body);pl.g.add(pl.lab);W.group.add(pl.g);VG.plants.push(pl);vPlantVisual(pl);return pl;}
+  if(SEEDS[pl.k]&&SEEDS[pl.k].mut){const gl=new THREE.Mesh(new THREE.SphereGeometry(.55,12,10),new THREE.MeshBasicMaterial({color:SEEDS[pl.k].sc,transparent:true,opacity:.15,blending:THREE.AdditiveBlending,depthWrite:false}));gl.position.y=.5;pl.body.add(gl);}pl.body.traverse(o=>{if(o.isMesh)o.castShadow=true;});}
+function vNewPlant(x,z,k,st,t,tm,f,inB,floor){
+  const pl={x,z,k,st,t,tm,f,inB:!!inB,floor:floor||0,hp:3,dmgT:0,g:new THREE.Group(),body:new THREE.Group(),lab:makeLabel(),fr:[]};
+  pl.g.position.set(x,(pl.inB?vFloorY(pl.floor)+.17:vTerrainH(x,z)+(vDirtAt(x,z)?.5:0)),z);pl.g.add(pl.body);pl.g.add(pl.lab);W.group.add(pl.g);VG.plants.push(pl);vPlantVisual(pl);return pl;}
 function vRemovePlant(pl){W.group.remove(pl.g);const i=VG.plants.indexOf(pl);if(i>=0)VG.plants.splice(i,1);}
 function vSaveKey(){return 'p3d_vw_'+VG.v.id;}
 function saveVillage(){if(!VG.v)return;
-  try{if(VNET.on&&!VNET.isHost){ // gość: zapisuje tylko swój ekwipunek (świat jest u hosta)
+  try{if(VG.saveGuest){ // gość: zapisuje tylko swój postęp (świat jest u hosta)
       localStorage.setItem(vSaveKey()+'_g',JSON.stringify({m:VG.money,inv:VG.inv,up:VG.up,
         mo:VG.mapOwned?1:0,ex:VG.exGrid?Array.from(VG.exGrid):null,hg:Math.round(HUN.v),
         wa:VG.workAsg.map(a=>[round2(a.x),round2(a.z)]),fr:VG.fruits}));return;}
@@ -2976,21 +3002,24 @@ function saveVillage(){if(!VG.v)return;
       lb:VG.labs.map(l=>[round2(l.x),round2(l.y),round2(l.z)]),
       hot:VG.hot.join(','),
       mo:VG.mapOwned?1:0,ex:VG.exGrid?Array.from(VG.exGrid):null,hg:Math.round(HUN.v),
-      tc:VG.choppedTrees,as:VG.hasAssist?1:0,fr:VG.fruits,
+      tc:VG.choppedTrees,as:VG.hasAssist?1:0,fr:VG.fruits,f4:VG.floor4?1:0,
       bx:VG.boxes.map(b=>({x:round2(b.x),y:round2(b.y),z:round2(b.z),in:b.inB?1:0,c:b.cnt})),
       wa:VG.workAsg.map(a=>[round2(a.x),round2(a.z)]),
-      pl:VG.plants.map(p=>({x:p.x,z:p.z,k:p.k,st:p.st,t:p.t,tm:p.tm,f:p.f,b:p.inB?1:0,h:p.hp,d:Math.round(p.dmgT)}))}));}catch(e){}}
+      pl:VG.plants.map(p=>({x:p.x,z:p.z,k:p.k,st:p.st,t:p.t,tm:p.tm,f:p.f,b:p.inB?1:0,fl:p.floor||0,h:p.hp,d:Math.round(p.dmgT)}))}));}catch(e){}}
 function enterVillage(v){
   if(G.inGame||VG.on)return;
   AU.resume();disposeWorld();showMenuWorld(false);show($('#menuOv'),false);
   VG.v=v;VG.on=true;VG.gui=false;VG.tab='buy';VG.bt='seeds';VG.it='seeds';VG.sel=null;VG.hand=null;VG.handKey='';
   VG.plants=[];VG.blocks=[];VG.labs=[];VG.money=100;VG.inv=emptyInv();VG.hot=[];VG.up={speed:0,fert:0,price:0,map:0,bunk:0,work:0,hunger:0};VG.saveT=0;VG.barKey='';
   VG.boxes=[];VG.workAsg=[];VG.wmarkG=null;VRK.vis=false;VRK.carry={};VRK.carryN=0;VRK.inB=false;VRK.hb=null;VG.choppedTrees=[];
-  VG.hasAssist=false;VG.assistG=null;VG.assistTag=null;VG.fruits={};VG.drops=[];VG.dropIdc=0;
+  VG.hasAssist=false;VG.assistG=null;VG.assistTag=null;VG.fruits={};VG.drops=[];VG.dropIdc=0;VG.floor4=false;VG.advTab='sub';
   VG.mapOwned=false;VG.mapOpen=false;show($('#vMapOv'),false);VG.exGrid=null;VG.exDirty=true;
   HUN.v=HUN.max;VG.hungWarn=false;VG.boxHintT=0;
   VG.dayT=0;VG.day=1;VG.phase='day';VG.park=false;VG.inside=false;
-  const guest=VNET.on&&!VNET.isHost;
+  // 🤝 tryb gościa: dołączenie po kodzie ORAZ ponowne wejście do wieloosobowej wioski offline
+  // (zapis _g istnieje → wczytaj postęp gościa, żeby ulepszenia nie znikały)
+  const guest=!VNET.isHost&&(VNET.on||(!!v.multi&&!!v.code&&!!localStorage.getItem(vSaveKey()+'_g')));
+  VG.saveGuest=guest;
   let sv=null;try{sv=JSON.parse(localStorage.getItem(vSaveKey()+(guest?'_g':''))||'null');}catch(e){}
   if(sv&&typeof sv.hot==='string')VG.hot=sv.hot.split(',').filter(k=>HOLD.includes(k));
   if(sv){if(typeof sv.m==='number')VG.money=sv.m;
@@ -3001,6 +3030,7 @@ function enterVillage(v){
     if(Array.isArray(sv.ex)&&sv.ex.length===EXN*EXN){VG.exGrid=new Uint8Array(EXN*EXN);for(let i=0;i<EXN*EXN;i++)VG.exGrid[i]=sv.ex[i]?1:0;}
     if(typeof sv.hg==='number')HUN.v=Math.max(0,Math.min(HUN.max,sv.hg));
     if(sv.as)VG.hasAssist=true;
+    if(sv.f4)VG.floor4=true;
     if(Array.isArray(sv.wa))VG.workAsg=sv.wa.filter(a=>Array.isArray(a)).map(a=>({x:+a[0]||0,z:+a[1]||0})).slice(0,1+VG.up.work);}
   if(guest&&VNET.pending&&VNET.pending.mapLv!==undefined)VG.up.map=Math.max(0,Math.min(UPG.map.max,+VNET.pending.mapLv||0));
   W=buildVillageWorld(v.id%1000003,VG.up.map);scene.add(W.group);VG.elder=W.elder;
@@ -3016,29 +3046,30 @@ function enterVillage(v){
   vAlienBuildAll();
   if(sv){
     if(Array.isArray(sv.bl))for(const q of sv.bl)if(BLOCKS.includes(q.t))vAddBlock(q.t,q.x|0,q.y|0,q.z|0);
-    if(Array.isArray(sv.bk))for(const q of sv.bk)vAddBunker(q[0],q[1],null,q[2]);
+    if(Array.isArray(sv.bk))for(const q of sv.bk)vAddBunker(q[0],q[1],null); // rozmiar stały (normalizacja starych zapisów)
     if(Array.isArray(sv.lb))for(const q of sv.lb)vAddLab(q[0],q[1],q[2]);
     if(Array.isArray(sv.bx))for(const q of sv.bx){if(!q||typeof q.x!=='number')continue;
       const b=vAddBox(+q.x,+q.y||0,+q.z,!!q.in);b.cnt=(q.c&&typeof q.c==='object')?q.c:{};vBoxLabel(b);}
     if(Array.isArray(sv.tc))for(const q of sv.tc){if(!Array.isArray(q))continue;
       vRemoveTreeAt(+q[0]||0,+q[1]||0);VG.choppedTrees.push([+q[0]||0,+q[1]||0]);}
     if(Array.isArray(sv.pl))for(const q of sv.pl){const k=SEEDS[q.k]?q.k:'seed1',sd=SEEDS[k];
-      const np=vNewPlant(q.x,q.z,k,q.st==='bush'?'bush':'seed',+q.t||0,+q.tm||sd.ft,Math.min(sd.max,+q.f||0),q.b===1);
+      const np=vNewPlant(q.x,q.z,k,q.st==='bush'?'bush':'seed',+q.t||0,+q.tm||sd.ft,Math.min(sd.max,+q.f||0),q.b===1,+q.fl||0);
       np.hp=q.h||3;np.dmgT=q.d||0;if(np.dmgT>0)np.body.visible=false;}}
   if(VNET.pending&&guest){ // stan świata od hosta (gość)
     const P=VNET.pending;VNET.pending=null;
     if(Array.isArray(P.bl))for(const q of P.bl)if(BLOCKS.includes(q.t))vAddBlock(q.t,q.x|0,q.y|0,q.z|0);
-    if(Array.isArray(P.bk))for(const q of P.bk)vAddBunker(q[0],q[1],null,q[2]);
+    if(Array.isArray(P.bk))for(const q of P.bk)vAddBunker(q[0],q[1],null);
     if(Array.isArray(P.lb))for(const q of P.lb)vAddLab(q[0],q[1],q[2]);
     if(Array.isArray(P.bx))for(const q of P.bx){if(!q||typeof q.x!=='number')continue;
       const b=vAddBox(+q.x,+q.y||0,+q.z,!!q.in);b.cnt=(q.c&&typeof q.c==='object')?q.c:{};vBoxLabel(b);}
     if(Array.isArray(P.tc))for(const q of P.tc){if(!Array.isArray(q))continue;
       vRemoveTreeAt(+q[0]||0,+q[1]||0);VG.choppedTrees.push([+q[0]||0,+q[1]||0]);}
     if(P.as)VG.hasAssist=true;
+    if(P.f4)VG.floor4=true;
     if(P.fr&&typeof P.fr==='object')for(const k in P.fr)if(typeof P.fr[k]==='number')VG.fruits[k]=P.fr[k]; // 🤝 wspólna pula owoców od hosta
     if(typeof P.hot==='string'&&P.hot)VG.hot=P.hot.split(',').filter(k=>HOLD.includes(k));
     if(Array.isArray(P.pl))for(const q of P.pl){const k=SEEDS[q.k]?q.k:'seed1',sd=SEEDS[k];
-      vNewPlant(q.x,q.z,k,q.st==='bush'?'bush':'seed',+q.t||0,+q.tm||sd.ft,Math.min(sd.max,+q.f||0),q.b===1);}
+      vNewPlant(q.x,q.z,k,q.st==='bush'?'bush':'seed',+q.t||0,+q.tm||sd.ft,Math.min(sd.max,+q.f||0),q.b===1,+q.fl||0);}
     if(P.dy){VG.dayT=+P.dtm||0;VG.day=Math.floor(VG.dayT/CYC)+1;VG.phase=VG.dayT%CYC<DAY_LEN?'day':'night';if(VG.phase==='night')vSkyNight();else vSky(VG.up.map);}}
   else VNET.pending=null;
   if(!VG.handG){VG.handG=new THREE.Group();VG.handG.position.set(.34,-.3,-.62);camera.add(VG.handG);}
@@ -3059,7 +3090,7 @@ function exitVillage(){
   if(document.pointerLockElement)document.exitPointerLock();
   VG.on=false;VG.v=null;VG.p=null;VG.plants=[];VG.blocks=[];VG.elder=null;VG.ghost=null;VG.ring=null;
   VG.boxes=[];VG.workAsg=[];VG.wmarkG=null;VRK.vis=false;VRK.carry={};VRK.carryN=0;VRK.inB=false;VRK.hb=null;
-  VG.hasAssist=false;VG.assistG=null;VG.assistTag=null;VG.fruits={};VG.drops=[];VG.dropIdc=0;
+  VG.hasAssist=false;VG.assistG=null;VG.assistTag=null;VG.fruits={};VG.drops=[];VG.dropIdc=0;VG.saveGuest=false;
   VG.mapOpen=false;show($('#vMapOv'),false);
   if(VG.handG){while(VG.handG.children.length)VG.handG.remove(VG.handG.children[0]);VG.handG.visible=false;}
   $('#vDay').className='';
@@ -3117,7 +3148,7 @@ function vnetHostData(c,d){if(!d||typeof d!=='object')return;
         lb:VG.labs.map(l=>[round2(l.x),round2(l.y),round2(l.z)]),
         bx:VG.boxes.map(b=>({x:round2(b.x),y:round2(b.y),z:round2(b.z),in:b.inB?1:0,c:b.cnt})),
         tc:VG.choppedTrees,
-        as:VG.hasAssist?1:0,fr:VG.fruits,
+        as:VG.hasAssist?1:0,fr:VG.fruits,f4:VG.floor4?1:0,
         dy:VG.day,dtm:Math.round(VG.dayT),
         pl:VG.plants.map(p=>({x:p.x,z:p.z,k:p.k,st:p.st,t:p.t,tm:p.tm,f:p.f,b:p.inB?1:0,h:p.hp,d:Math.round(p.dmgT)}))});}catch(e){}
       vnetEv({a:'pjoin',id,nick:pl.nick,color:pl.color});
@@ -3165,7 +3196,7 @@ function vnetClientData(d){if(!d||typeof d!=='object')return;
     VNET.players={};for(const p of(d.players||[]))VNET.players[p.id]={id:p.id,nick:p.nick,color:p.color,x:0,y:0,z:6,yaw:0};
     showNet('');
     const v={id:d.vid,name:d.name||('Wioska '+VNET.code),multi:true,code:VNET.code};
-    VNET.pending={bl:d.bl||[],bk:d.bk||[],lb:d.lb||[],bx:d.bx||[],tc:d.tc||[],pl:d.pl||[],mapLv:d.mapLv,as:d.as,fr:d.fr||{},dy:d.dy,dtm:d.dtm,hot:VG.hot.join(',')};
+    VNET.pending={bl:d.bl||[],bk:d.bk||[],lb:d.lb||[],bx:d.bx||[],tc:d.tc||[],pl:d.pl||[],mapLv:d.mapLv,as:d.as,fr:d.fr||{},f4:d.f4,dy:d.dy,dtm:d.dtm,hot:VG.hot.join(',')};
     toast('🏘️ '+T('Dołączono do wioski','Joined village')+' „'+esc(v.name)+'"','good');
     enterVillage(v);
     VG.money=Math.max(0,Math.round(+d.m||0)); // wspólny portfel od hosta
@@ -3209,7 +3240,7 @@ function handleVillMsg(ev){if(!ev||!ev.a)return;
   switch(ev.a){
     case 'blkAdd':if(VG.on&&!VG.blocks.some(b=>b.x===ev.x&&b.y===ev.y&&b.z===ev.z))vAddBlock(ev.bt,ev.x,ev.y,ev.z);break;
     case 'blkDel':{if(!VG.on)break;const b=VG.blocks.find(b=>b.x===ev.x&&b.y===ev.y&&b.z===ev.z);if(b)vRemoveBlock(b);break;}
-    case 'plantAdd':if(VG.on&&!VG.plants.some(p=>Math.abs(p.x-ev.x)<.05&&Math.abs(p.z-ev.z)<.05&&p.inB===!!ev.in)){const sd=SEEDS[ev.k]||SEEDS.seed1;vNewPlant(ev.x,ev.z,ev.k,'seed',sd.grow,sd.ft,0,ev.in===1);}break;
+    case 'plantAdd':if(VG.on&&!VG.plants.some(p=>Math.abs(p.x-ev.x)<.05&&Math.abs(p.z-ev.z)<.05&&p.inB===!!ev.in&&(p.floor||0)===(ev.fl||0))){const sd=SEEDS[ev.k]||SEEDS.seed1;vNewPlant(ev.x,ev.z,ev.k,'seed',sd.grow,sd.ft,0,ev.in===1,ev.fl||0);}break;
     case 'treeChop':{if(!VG.on||!W||!W.trees)break;
       const t=vRemoveTreeAt(ev.x,ev.z);
       if(t&&!VG.choppedTrees.some(q=>Math.abs(q[0]-t.x)<.6&&Math.abs(q[1]-t.z)<.6))VG.choppedTrees.push([round2(t.x),round2(t.z)]);break;}
@@ -3245,6 +3276,10 @@ function handleVillMsg(ev){if(!ev||!ev.a)return;
       let bd=1.6,c2=null;for(const c of W.carrots){if(!c.mesh.visible)continue;
         const d=Math.hypot(c.x-ev.x,c.z-ev.z);if(d<bd){bd=d;c2=c;}}
       if(c2){c2.mesh.visible=false;c2.t=100;}break;}
+    case 'bottlePick':{if(!VG.on||!W||!W.bottles)break;
+      let bd=1.6,b2=null;for(const bt of W.bottles){if(!bt.mesh.visible)continue;
+        const d=Math.hypot(bt.x-ev.x,bt.z-ev.z);if(d<bd){bd=d;b2=bt;}}
+      if(b2){b2.mesh.visible=false;b2.t=400;}break;}
     case 'boxAdd':{if(VG.on&&!VG.boxes.some(b=>Math.abs(b.x-ev.x)<.3&&Math.abs(b.z-ev.z)<.3&&b.inB===!!ev.in))vAddBox(+ev.x||0,+ev.y||0,+ev.z||0,!!ev.in);break;}
     case 'boxDel':{if(!VG.on)break;const b=VG.boxes.find(b=>Math.abs(b.x-ev.x)<.3&&Math.abs(b.z-ev.z)<.3&&b.inB===!!ev.in);if(b)vRemoveBox(b);break;}
     case 'boxSet':{if(!VG.on)break;const b=VG.boxes.find(b=>Math.abs(b.x-ev.x)<.3&&Math.abs(b.z-ev.z)<.3&&b.inB===!!ev.in);
@@ -3280,6 +3315,7 @@ function handleVillMsg(ev){if(!ev||!ev.a)return;
     case 'bunkerDel':{if(!VG.on)break;const b=VG.bunkers.find(b=>b.x===ev.x&&b.z===ev.z);if(b)vRemoveBunker(b);break;}
     case 'bunkerResize':{if(!VG.on)break;for(const b of VG.bunkers)vResizeBunker(b,ev.s||bunkerSize());vBuildInterior(W);break;}
     case 'asystAdd':{if(VG.on){VG.hasAssist=true;vAssistSpawn();}break;}
+    case 'advFloor4':{if(VG.on){VG.floor4=true;vBuildInterior(W);}break;}
     case 'swordTake':{ // miecz zostaje w świecie — każdy gracz może go podnieść
       if(ev.by!==VNET.myId)toast('⚔️ '+vNickOf(ev.by)+' '+T('zdobył miecz!','got the sword!'),'good');break;}}}
 function vElderDist(){const p=VG.p,e=VG.elder;return(p&&e)?Math.hypot(p.x-e.position.x,p.z-e.position.z):99;}
@@ -3301,8 +3337,8 @@ function villageEAction(){ // E: drzewo/parkour, wyjścia, dziadek
     const lb=vNearLab();
     if(lb){openLab();return;}
     if(vBoxCollect())return;
-    // zrywanie owoców w bunkrze (E przy krzaku)
-    for(const pl of VG.plants){if(!pl.inB||pl.dmgT>0||!(pl.f>0))continue;
+    // zrywanie owoców w bunkrze (E przy krzaku) — tylko na swoim piętrze
+    for(const pl of VG.plants){if(!pl.inB||(pl.floor||0)!==vFloorOf(p.y)||pl.dmgT>0||!(pl.f>0))continue;
       const sd2=SEEDS[pl.k];
       if(Math.hypot(pl.x-p.x,pl.z-p.z)<1.7+(sd2.k-1)){
         const bonus=vDirtAt(pl.x,pl.z)?Math.round(pl.f*itemPrice(sd2.out)*.1):0;
@@ -3314,11 +3350,16 @@ function villageEAction(){ // E: drzewo/parkour, wyjścia, dziadek
         if(VG.gui==='inv')renderInv();else if(VG.gui)renderShop();
         return;}}
     if(vNearBox()){toast('📦 '+T('Skrzynka jest pusta','The crate is empty'));return;}
+    // 🧪 kapsuła zaawansowanego laboratorium (piętro 4) — E: substancje i mutacje
+    if(vNearCapsule()){openAdvLab();return;}
+    // 🛗 winda — wybierz piętro (lewa strona rogu z wyjściem)
+    {const{half}=vRoomDims();
+     if(W.elevPos&&Math.hypot(p.x-W.elevPos.x,p.z-W.elevPos.z)<1.8&&Math.abs(p.y-vFloorY(vFloorOf(p.y)))<2){openElev();return;}}
     {const pl=VG.plants.find(q=>q.inB&&!q.dmgT&&Math.hypot(q.x-p.x,q.z-p.z)<2.2);
      if(pl){toast('🌿 '+T('Ta roślinka nie ma jeszcze owoców','This plant has no fruit yet'));return;}}
     // 🧑‍🌾 asystent — sklep jak u dziadka
     if(VG.assistG&&Math.hypot(p.x-VG.assistG.position.x,p.z-VG.assistG.position.z)<3.8){openShop();return;}
-    if(W&&W.bunkerExit&&p.bunkerFrom&&Math.hypot(p.x-W.bunkerExit.x,p.z-W.bunkerExit.z)<2){
+    if(W&&W.bunkerExit&&p.bunkerFrom&&vFloorOf(p.y)===0&&Math.hypot(p.x-W.bunkerExit.x,p.z-W.bunkerExit.z)<2.6){
       p.inside=false;p.x=p.bunkerFrom.x;p.z=p.bunkerFrom.z;p.y=p.bunkerFrom.y;p.vy=0;p.vx=p.vz=0;
       toast('🚪 '+T('Wróciłeś na powierzchnię','Back on the surface'));return;}
     toast('🚪 '+T('Wyjście w rogu bunkra','Exit at the bunker corner'));return;}
@@ -3337,6 +3378,13 @@ function villageEAction(){ // E: drzewo/parkour, wyjścia, dziadek
       const before=HUN.v;HUN.v=Math.min(HUN.max,HUN.v+20);VG.hungWarn=false;
       AU.coin();toast('🥕 +'+Math.round(HUN.v-before)+'s '+T('głodu','hunger'),'good');
       vnetAct({a:'carrotPick',x:round2(best.x),z:round2(best.z)});return;}}
+  // 🧴 butelki z wodą (E) — cicho, bez komunikatu; składnik laboratorium
+  if(!p.park&&W&&W.bottles){let best=null,bd=1.4;
+    for(const bt of W.bottles){if(!bt.mesh.visible)continue;
+      const d=Math.hypot(bt.x-p.x,bt.z-p.z);if(d<bd&&Math.abs(p.y-vTerrainH(bt.x,bt.z))<3){bd=d;best=bt;}}
+    if(best){best.mesh.visible=false;best.t=400;
+      VG.inv.bottle=(VG.inv.bottle||0)+1;AU.click();
+      vnetAct({a:'bottlePick',x:round2(best.x),z:round2(best.z)});return;}}
   // 📤 podnoszenie wyrzuconych przedmiotów (E)
   if(W&&VG.drops.length){let best=null,bd=1.8;
     for(const d of VG.drops){const d2=Math.hypot(d.x-p.x,d.z-p.z);
@@ -3382,8 +3430,59 @@ function vFreeze(){VG.lockExitT=now();INP.keys={};updInp();if(document.pointerLo
 function openShop(){VG.gui='shop';vFreeze();show($('#shopOv'),true);renderShop();AU.gui();}
 function openInv(){VG.gui='inv';vFreeze();show($('#invOv'),true);renderInv();AU.gui();}
 function closeShop(relock){if(!VG.gui&&!relock)return;VG.gui=false;show($('#shopOv'),false);show($('#invOv'),false);
-  show($('#vPauseOv'),false);show($('#labOv'),false);AU.gui();
+  show($('#vPauseOv'),false);show($('#labOv'),false);show($('#vElevOv'),false);show($('#vAdvOv'),false);AU.gui();
   if(relock&&VG.on){try{canvas.requestPointerLock();}catch(e){}}}
+function openElev(){ // 🛗 winda — wybierz piętro
+  if(!VG.on||VG.gui||!(VG.p&&VG.p.inside))return;
+  vFreeze();VG.gui='elev';renderElev();show($('#vElevOv'),true);AU.gui();}
+// ---- 🧪 zaawansowane laboratorium (piętro 4) ----
+function vNearCapsule(){const p=VG.p;if(!p||!W||!W.capsulePos)return false;
+  return !!VG.floor4&&p.inside&&Math.hypot(p.x-W.capsulePos.x,p.z-W.capsulePos.z)<2.4&&Math.abs(p.y-W.capsulePos.y)<2.5;}
+function openAdvLab(){if(!VG.on||VG.gui)return;if(!vNearCapsule())return;
+  vFreeze();VG.gui='adv';VG.advTab='sub';renderAdv();show($('#vAdvOv'),true);AU.gui();}
+function renderAdv(){
+  const tabS=VG.advTab!=='seed';
+  $('#vAdvTabS').classList.toggle('sel',tabS);$('#vAdvTabG').classList.toggle('sel',!tabS);
+  let h='';
+  if(tabS){ // SUBSTANCJA: 100 kwiatków + 20 butelek + barwnik niebieski
+    const row=(lbl,have,need)=>'<div class="shRow"><div class="shn">'+lbl+'</div><b style="color:'+(have>=need?'#a8e063':'#ff8a7a')+'">'+have+'/'+need+'</b></div>';
+    h+=row('⬜ Biały kwiatek',VG.inv.wflower||0,100);
+    h+=row('🧴 Butelka wody',VG.inv.bottle||0,20);
+    h+=row('🔵 Barwnik niebieski',VG.inv.dye||0,1);
+    const ok=(VG.inv.wflower||0)>=100&&(VG.inv.bottle||0)>=20&&(VG.inv.dye||0)>=1;
+    h+='<div class="row"><button class="btn sm acc" data-advsub="1"'+(ok?'':' disabled')+'>🧪 WYTWÓRZ SUBSTANCJĘ</button></div>';
+    h+='<div class="tag">🧪 Substancja — składnik mutacji nasion (zakładka SEEDS)</div>';
+    h+='<div class="tag" style="margin-top:4px">🔵 Barwnik niebieski — przepis jeszcze nieznany…</div>';
+  }else{ // SEEDY: nasiono + substancja → nasiono mutant
+    h+='<div class="tag">1 nasiono + 1 🧪 substancja → 🧬 zmutowane nasiono: owoc +5% wartości, roślina +10% szybciej rośnie (lekko neonowa)</div>';
+    let any=false;
+    for(const k of SEED_KEYS){const n=VG.inv[k]||0;if(n<=0)continue;any=true;
+      h+='<div class="shRow"><div class="shn">'+iN(ITEMS[k])+'<small>🧪 Substancja ×'+(VG.inv.subst||0)+'</small></div><b>×'+n+'</b><button class="btn sm calm" data-mut="'+k+'"'+((VG.inv.subst||0)>0?'':' disabled')+' style="margin-left:6px">🧬 ZMUTUJ</button></div>';}
+    if(!any)h+='<div class="tag">Brak nasion w ekwipunku</div>';}
+  $('#vAdvBody').innerHTML=h;}
+function advCraftSub(){const V=VG;
+  if((V.inv.wflower||0)<100||(V.inv.bottle||0)<20||(V.inv.dye||0)<1){toast('🧪 '+T('Brak składników…','Missing ingredients…'),'bad');return;}
+  V.inv.wflower-=100;V.inv.bottle-=20;V.inv.dye-=1;V.inv.subst=(V.inv.subst||0)+1;
+  AU.fanfare();toast('🧪 '+T('Wytworzono SUBSTANCJĘ! Składnik mutacji gotowy','SUBSTANCE crafted! Mutation ingredient ready'),'good');
+  saveVillage();renderAdv();}
+function advMutate(k){const V=VG;
+  if(!(V.inv[k]>0)||!(V.inv.subst>0)){toast('🧬 '+T('Potrzeba nasiona i substancji','Need a seed and substance'),'bad');return;}
+  V.inv[k]--;V.inv.subst--;V.inv['m'+k]=(V.inv['m'+k]||0)+1;
+  AU.fanfare();toast('🧬 '+iN(ITEMS['m'+k])+T(' w ekwipunku! Owoc +5% wartości, wzrost +10%',' in inventory! Fruit +5% value, growth +10%'),'good');
+  saveVillage();renderAdv();}
+function renderElev(){
+  const n=vFloorCount(),cur=vFloorOf(VG.p.y);
+  let h='';
+  for(let i=0;i<n;i++){
+    const last=i===n-1&&VG.up.bunk>=3;
+    let lbl,right='';
+    if(last&&!VG.floor4){ // najniższe piętro — do kupienia za $10M
+      lbl=T('🪜 Piętro '+i+' — 🧪 zaawansowane laboratorium','🪜 Floor '+i+' — 🧪 advanced lab');
+      right='<b style="color:#ffd60a">$10M</b><button class="btn sm acc" data-buy4="1">'+T('KUP','BUY')+'</button>';}
+    else{lbl=i===0?T('🪜 Piętro 0 — wyjście','🪜 Floor 0 — exit'):(last?T('🪜 Piętro '+i+' — 🧪 laboratorium adv','🪜 Floor '+i+' — 🧪 adv lab'):T('🪜 Piętro '+i+' — ziemia','🪜 Floor '+i+' — soil'));
+      right=i===cur?'<b>'+T('JESTEŚ TU','YOU ARE HERE')+'</b>':'<button class="btn sm calm" data-fl="'+i+'">'+T('JEDŹ','GO')+'</button>';}
+    h+='<div class="shRow"><div class="shn">'+lbl+'</div>'+right+'</div>';}
+  $('#vElevBtns').innerHTML=h;}
 function openPause(){ // ESC w grze — pauza: menu (opcje/gracze/wyjście po kliknięciu)
   if(!VG.on||VG.gui)return;vFreeze();VG.gui='pause';renderPause();vPauseView('root');show($('#vPauseOv'),true);AU.gui();}
 function vPauseView(v){ // root | opt | pl
@@ -3458,7 +3557,7 @@ function renderShop(){
 function renderInv(){
   $('#invMoney').textContent='$'+fmtK(VG.money);
   document.querySelectorAll('#invOv [data-it]').forEach(b=>b.classList.toggle('sel',b.dataset.it===VG.it));
-  const keys=VG.it==='seeds'?SEED_KEYS:(VG.it==='blocks'?[...BLOCKS,'pick','axe','hoe']:(VG.it==='workers'?['workr','wbox']:['plant','plant2','plant3','plant4','plant5','plant6','plant7','plant8','plant9','plant10','plant11','plant12','plant13','plant14','plant15']));
+  const keys=VG.it==='seeds'?SEED_KEYS.concat(MUT_KEYS):(VG.it==='blocks'?[...BLOCKS,'pick','axe','hoe']:(VG.it==='workers'?['workr','wbox']:['plant','plant2','plant3','plant4','plant5','plant6','plant7','plant8','plant9','plant10','plant11','plant12','plant13','plant14','plant15','bottle','dye','subst']));
   let h='';
   for(const k of keys){const it=ITEMS[k];let n=VG.inv[k]||0;
     if(EAT[k]&&VNET.on)n=vFruitTotal(k); // 🤝 w MP owoce liczone ze wspólnej puli
@@ -3466,9 +3565,10 @@ function renderInv(){
     const sub=it.seed?seedInfo(k):(it.tool?T('narzędzie — niszczy postawione bloki (LPM/PPM)','tool — destroys placed blocks (LMB/RMB)'):
       (it.worker?T('LPM zaznacza roślinkę dla pracownika — zbiera owoce i znosi je do skrzynki','LMB marks a plant for the worker — it harvests fruits and delivers them to the crate'):
       (it.box?T('postaw na trawie lub w bunkerze (LPM) — E odbiera zebrane owoce','place on grass or in the bunker (LMB) — press E to collect the harvested fruits'):
+      (it.ing?T('składnik zaawansowanego laboratorium (piętro 4 bunkra)','advanced laboratory ingredient (bunker floor 4)'):
       (EAT[k]?(VNET.on?T('wspólny zapas — każdy może jeść i sprzedawać','shared stock — anyone can eat and sell')+' · 🍽️ +'+(EAT[k]>=HUN.max?T('cały pasek','full bar'):EAT[k]+'s'):
         T('trzymaj w ręce i kliknij E, żeby zjeść (🍽️ +','hold in hand and press E to eat (🍽️ +')+(EAT[k]>=HUN.max?T('cały pasek','full bar'):EAT[k]+'s)')+' · $'+fmtK(itemPrice(k))):
-      (holdable?T('blok do budowania','block for building'):'$'+fmtK(itemPrice(k))+T(' za sztukę (sprzedaj u dziadka)',' per piece (sell to the old hamster)'))))));
+      (holdable?T('blok do budowania','block for building'):'$'+fmtK(itemPrice(k))+T(' za sztukę (sprzedaj u dziadka)',' per piece (sell to the old hamster)')))))));
     h+='<div class="shRow'+(VG.hand===k?' sel':'')+(n?'':' dimr')+'"><div class="shn">'+iN(it)+'<small>'+sub+'</small></div><b>×'+n+'</b>'+
       (holdable?'<button class="btn sm calm" data-hold="'+k+'"'+(n?'':' disabled')+'>'+(VG.hand===k?T('✔ W RĘCE','✔ IN HAND'):T('WEŹ','TAKE'))+'</button>':'')+
       (EAT[k]?'<button class="btn sm calm" data-eat="'+k+'"'+(n>0?'':' disabled')+' style="margin-left:6px">🍽️ '+T('ZJEDZ','EAT')+'</button>':'')+'</div>';}
@@ -3626,23 +3726,110 @@ function stoneMat(){ // tekstura jak trawa, ale szara (ściany i sufit bunkra)
   x.globalAlpha=1;
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(3,1);t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
   STONE_MAT=new THREE.MeshLambertMaterial({map:t,color:0xffffff});return STONE_MAT;}
-function vBuildInterior(w){ // pokoje z prostokątnymi przejściami — liczba wg największego bunkra
+let ROOM_MATS=null;
+function roomMats(){if(!ROOM_MATS){ROOM_MATS={stone:new THREE.MeshBasicMaterial({map:stoneMat().map}), // szara tekstura bez odcieni światła
+  floor:matOf('#5a5f68'),soil:matOf('#4a3018'),ceil:new THREE.MeshBasicMaterial({color:'#9aa0a6'})};}return ROOM_MATS;}
+function vRoomDims(){ // rozmiar pokoju STAŁY — zawsze 2 pokoje i 1 ściana działowa; ulepszenia dają tylko PIĘTRA
+  return{roomW:14,half:7,rooms:2};}
+function vBuildInterior(w){ // komnata + PIĘTRA wg ulepszenia: 0=wyjście+podział, 1-3=cała ziemia, 4=puste (szare)
   if(!w||!w.bunkerIn)return;
-  if(w.intWalls)w.bunkerIn.remove(w.intWalls);
-  if(w.intBoxRefs)for(const bx of w.intBoxRefs){const i=w.boxes.indexOf(bx);if(i>=0)w.boxes.splice(i,1);}
-  w.intBoxRefs=[];
-  w.intWalls=new THREE.Group();w.bunkerIn.add(w.intWalls);
-  const maxB=VG.bunkers.length?Math.max(...VG.bunkers.map(b=>b.size||3)):3;
-  const rooms=Math.max(2,Math.min(5,2+Math.round((maxB-3)/2))); // najmniejszy poziom: 2 pokoje
-  const mat=new THREE.MeshBasicMaterial({map:stoneMat().map}); // szara tekstura bez zielonych odcieni światła
-  const mkWall=(x,z,ww,wd)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(ww,5.5,wd),mat);
-    m.position.set(x,2.75,z);w.intWalls.add(m);
-    const bx={x,y:BKY+2.75,z,hx:ww/2,hy:2.75,hz:wd/2};w.boxes.push(bx);w.intBoxRefs.push(bx);};
-  for(let i=1;i<rooms;i++){const x=-7+14*i/rooms;
-    mkWall(x,-4.1,.4,5.8);mkWall(x,4.1,.4,5.8); // ściana z prostokątnym przejściem w środku
-    const lt=new THREE.PointLight(0xffd9a0,1,14);lt.position.set(x,3.3,0);w.intWalls.add(lt);}
-  const li=new THREE.PointLight(0xffd9a0,1.1,16);li.position.set(0,2.4,0);w.intWalls.add(li);}
-function bunkerSize(){return 3+2*VG.up.bunk;}
+  if(VG.assistG&&VG.assistG.parent===w.bunkerIn)w.bunkerIn.remove(VG.assistG); // asystent przeżyje przebudowę
+  if(w.roomBoxRefs)for(const bx of w.roomBoxRefs){const i=w.boxes.indexOf(bx);if(i>=0)w.boxes.splice(i,1);}
+  w.roomBoxRefs=[];
+  for(const o of[...w.bunkerIn.children]){ // sprzątnij stare piętra
+    w.bunkerIn.remove(o);
+    if(o.traverse)o.traverse(q=>{if(q.geometry)q.geometry.dispose();});}
+  const{roomW,half,rooms}=vRoomDims();
+  const floors=vFloorCount();
+  const M=roomMats();
+  const addCol=(x,y,z,hx,hy,hz)=>{const bx={x,y,z,hx,hy,hz};w.boxes.push(bx);w.roomBoxRefs.push(bx);};
+  const mesh=(geo,mat2,x,y,z)=>{const m=new THREE.Mesh(geo,mat2);m.position.set(x,y,z);m.receiveShadow=true;w.bunkerIn.add(m);return m;};
+  const segL=half-1.2,segC=(half+1.2)/2;
+  for(let n=0;n<floors;n++){
+    const yr=-n*FLOOR_H;        // Y względne (grupa bi leży już na BKY)
+    const y0=vFloorY(n);        // Y absolutne — kolizje i punkt wyjścia
+    // PODŁOGA: piętro 0 — paski wg pokoi (ostatnia część przy wyjściu BEZ sadzenia); 1-3 — cała ziemia; 4 — szara pusta
+    if(n===0){
+      for(let i=0;i<rooms;i++){const cx=-half+roomW*(i+.5)/rooms;
+        const f=mesh(new THREE.BoxGeometry(roomW/rooms,.5,roomW),M.floor,cx,yr-.25,0);
+        f.userData.inB=true;if(i===rooms-1)f.userData.noSeed=true; // część z wyjściem: bez nasion
+        if(i<rooms-1){const s=mesh(new THREE.BoxGeometry(roomW/rooms,.16,roomW),M.soil,cx,yr+.08,0);s.userData.inB=true;}}
+    }else{
+      const f=mesh(new THREE.BoxGeometry(roomW,.5,roomW),n<floors-1?M.soil:M.floor,0,yr-.25,0);
+      if(n<floors-1)f.userData.inB=true; // piętra 1-3: sadzisz wszędzie; piętro 4: puste
+    }
+    mesh(new THREE.BoxGeometry(roomW+.6,.5,roomW+.6),M.ceil,0,yr+5.5,0); // sufit
+    for(const[wx,wz,ww,wd]of[[0,-half,roomW,.6],[0,half,roomW,.6],[-half,0,.6,roomW],[half,0,.6,roomW]])
+      mesh(new THREE.BoxGeometry(ww,5.5,wd),M.stone,wx,yr+2.75,wz); // ściany szare
+    const lt=new THREE.PointLight(0xffd9a0,1.3,26);lt.position.set(0,yr+3.4,0);w.bunkerIn.add(lt);
+    if(n===0){const amb=new THREE.AmbientLight(0xd8d2c4,.55);w.bunkerIn.add(amb);}
+    addCol(0,y0-.25,0,roomW/2,.25,roomW/2);
+    addCol(0,y0+5.5,0,roomW/2+.3,.25,roomW/2+.3);
+    addCol(0,y0+2.75,-half,roomW/2,2.75,.3);
+    addCol(0,y0+2.75,half,roomW/2,2.75,.3);
+    addCol(-half,y0+2.75,0,.3,2.75,roomW/2);
+    addCol(half,y0+2.75,0,.3,2.75,roomW/2);
+    // ścianki działowe — tylko piętro 0 (wyższe niepodzielone)
+    if(n===0)for(let i=1;i<rooms;i++){const x=-half+roomW*i/rooms;
+      mesh(new THREE.BoxGeometry(.4,5.5,segL),M.stone,x,yr+2.75,-segC);
+      mesh(new THREE.BoxGeometry(.4,5.5,segL),M.stone,x,yr+2.75,segC);
+      const lt2=new THREE.PointLight(0xffd9a0,1,14);lt2.position.set(x,yr+3.3,0);w.bunkerIn.add(lt2);
+      addCol(x,y0+2.75,-segC,.2,2.75,segL/2);
+      addCol(x,y0+2.75,segC,.2,2.75,segL/2);}
+    // 🛗 WINDA — szare drzwi na ścianie po DRUGIEJ stronie od wyjścia
+    const evx=-half+.34,evz=-half+1.5;
+    const frame=box(.16,2.7,1.9,'#6a6f78');frame.position.set(evx,yr+1.35,evz);w.bunkerIn.add(frame);
+    const dl=box(.1,2.4,.75,'#7d848d');dl.position.set(evx+.09,yr+1.2,evz-.4);w.bunkerIn.add(dl);
+    const dr2=box(.1,2.4,.75,'#7d848d');dr2.position.set(evx+.09,yr+1.2,evz+.4);w.bunkerIn.add(dr2);
+    const sign=makeLabel();sign.userData.set('🛗 '+n,'#ffe08a');sign.scale.set(.8,.3,1);
+    sign.material.depthTest=true; // napis zasłaniany przez ściany
+    sign.position.set(evx+.12,yr+2.85,evz);w.bunkerIn.add(sign);
+    if(n===0||!w.elevPos)w.elevPos={x:evx+.9,z:evz}; // punkt interakcji przed drzwiami (x,z stałe na wszystkich piętrach)
+    // 🚪 wyjście — tylko piętro 0 (drzwi przylegają do ściany)
+    if(n===0){
+      const exg=new THREE.Group();exg.position.set(half-.37,0,half-1.4);exg.rotation.y=-Math.PI/2;
+      const exf=box(1.5,2.5,.12,'#4a3118');exf.position.y=1.25;exg.add(exf);
+      const exd=box(1.2,2.3,.14,'#6e4426');exd.position.set(0,1.15,.03);exg.add(exd);
+      const exh=sph(.06,'#c9a227');exh.position.set(.42,1.1,.13);exg.add(exh);
+      w.bunkerIn.add(exg);
+      const exs=makeLabel();exs.userData.set('🚪 EXIT','#7dff8a');exs.scale.set(2.2,.83,1);
+      exs.material.depthTest=true; // napis zasłaniany przez ściany
+      exs.position.set(half-.8,3.15,half-1.4);w.bunkerIn.add(exs);w.exitLbl=exs;}
+    // 🧪 zaawansowane laboratorium — najniższe piętro po zakupie ($10M)
+    if(n===floors-1&&VG.up.bunk>=3&&VG.floor4){
+      const cols=['#1e90ff','#39ff14','#a05ad0']; // niebieski, zielony, fioletowy
+      for(let i=0;i<3;i++){const tx=-half+3+i*2.6,tz=-half+1.5;
+        const base=box(.95,.3,.95,'#3a4149');base.position.set(tx,yr+.15,tz);w.bunkerIn.add(base);
+        const glass=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,2.1,16),new THREE.MeshLambertMaterial({color:'#cfe8ff',transparent:true,opacity:.3}));
+        glass.position.set(tx,yr+1.35,tz);w.bunkerIn.add(glass);
+        const liq=new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,1.5,16),new THREE.MeshLambertMaterial({color:cols[i],emissive:cols[i],emissiveIntensity:.35}));
+        liq.position.set(tx,yr+1.15,tz);w.bunkerIn.add(liq);
+        const capT=box(.95,.15,.95,'#4a5158');capT.position.set(tx,yr+2.45,tz);w.bunkerIn.add(capT);
+        const bub=new THREE.Mesh(new THREE.SphereGeometry(.06,8,6),new THREE.MeshLambertMaterial({color:cols[i],emissive:cols[i]}));
+        bub.position.set(tx,yr+1.6,tz);w.bunkerIn.add(bub); // bąbelek w płynie
+        const lt3=new THREE.PointLight(cols[i],.6,5);lt3.position.set(tx,yr+1.8,tz+0.6);w.bunkerIn.add(lt3);}
+      // biurko z ekranami
+      const dk=box(2.2,.1,.9,'#f2f2f2');dk.position.set(half-3.4,yr+.95,0);w.bunkerIn.add(dk);
+      for(const[lx,lz]of[[-1,-.35],[1,-.35],[-1,.35],[1,.35]]){
+        const lg=box(.09,.9,.09,'#c9ccd4');lg.position.set(half-3.4+lx,yr+.45,lz);w.bunkerIn.add(lg);}
+      const mon=box(.7,.5,.06,'#10141a');mon.position.set(half-3.4,yr+1.35,-.25);w.bunkerIn.add(mon);
+      const scr=box(.6,.4,.02,'#39ff14');scr.position.set(half-3.4,yr+1.35,-.21);w.bunkerIn.add(scr);
+      // 🛋️ kapsuła — specjalne siedzenie (E → laboratorium adv)
+      const cap=new THREE.Group();cap.position.set(0,yr,1.2);cap.rotation.y=0; // kapsuła PRZED BIURKIEM, otworem do biurka
+      const shell=new THREE.Mesh(new THREE.SphereGeometry(1.1,18,14),new THREE.MeshLambertMaterial({color:'#8a93a0',transparent:true,opacity:.55}));
+      shell.scale.set(1,1.25,.9);shell.position.y=1.1;cap.add(shell);
+      const seat=box(.7,.16,.7,'#2a3138');seat.position.set(0,.55,.15);cap.add(seat);
+      const back=box(.7,.9,.14,'#2a3138');back.position.set(0,1.05,.5);cap.add(back);
+      const dome=new THREE.Mesh(new THREE.SphereGeometry(.95,18,14,0,Math.PI*2,0,Math.PI/2.2),new THREE.MeshLambertMaterial({color:'#bfe3ff',transparent:true,opacity:.35}));
+      dome.position.y=1.1;cap.add(dome);
+      const cled=makeLabel();cled.userData.set('🧪 LAB ADV','#7dff8a');cled.scale.set(1.8,.68,1);
+      cled.material.depthTest=true;cled.position.set(0,2.3,0);cap.add(cled);
+      w.bunkerIn.add(cap);
+      w.capsulePos={x:half-3.4,z:1.2,y:y0};}
+  }
+  w.bunkerExit={x:half-1.0,y:BKY,z:half-1.0};
+  if(VG.assistG){VG.assistG.position.set(-half+2,0,half-2.5);w.bunkerIn.add(VG.assistG);}}
+function bunkerSize(){return 3;} // rozmiar bunkra stały — ulepszenia dają tylko PIĘTRA w środku
 function buildBunkerMesh(x,z,size,h){
   const g=new THREE.Group();g.position.set(x+size/2,h,z+size/2);
   const slab=box(size+4,1.4,size+4,'#6a6f78');slab.position.y=.4;g.add(slab); // niski: ~1 blok nad ziemią, szersza wylewka
@@ -3815,16 +4002,16 @@ function vWorkTick(dt){ // 🐇 AI pracownika: idzie do zaznaczonych roślinek, 
   if(!W.workMesh)vWorkBuild();
   W.workMesh.visible=true;
   let tgt=null;
-  if(VRK.carryN>0){ // znosi owoce do najbliższej skrzynki (swojego poziomu, potem dowolnej)
-    let bs=VG.boxes.filter(b=>b.inB===VRK.inB);
+  if(VRK.carryN>0){ // znosi owoce do najbliższej skrzynki (swojego poziomu, potem dowolnej; skrzynki na niższych piętrach pomija)
+    let bs=VG.boxes.filter(b=>b.inB===VRK.inB&&!(b.inB&&Math.round((b.y-BKY)/FLOOR_H)>0));
     if(!bs.length)bs=VG.boxes;
     let best=null,bd=1e9;
     for(const b of bs){const d=Math.hypot(b.x-VRK.x,b.z-VRK.z);if(d<bd){bd=d;best=b;}}
     if(best)tgt={x:best.x,z:best.z,inB:best.inB,kind:'box',b:best};}
-  if(!tgt){ // najbliższa zaznaczona roślinka z owocami
+  if(!tgt){ // najbliższa zaznaczona roślinka z owocami (piętro 0 — pracownik nie jeździ windą)
     let best=null,bd=1e9;
     for(const a of VG.workAsg){const pl=VG.plants.find(q=>Math.abs(q.x-a.x)<.3&&Math.abs(q.z-a.z)<.3);
-      if(!pl||pl.dmgT>0||!(pl.f>0))continue;
+      if(!pl||pl.dmgT>0||!(pl.f>0)||(pl.floor||0)>0)continue;
       const d=Math.hypot(pl.x-VRK.x,pl.z-VRK.z);if(d<bd){bd=d;best=pl;}}
     if(best)tgt={x:best.x,z:best.z,inB:best.inB,kind:'pick',pl:best};
     else if(VG.workAsg.length){ // czeka przy pierwszej zaznaczonej
@@ -3898,7 +4085,7 @@ function vAssistSpawn(){ // 🧑‍🌾 asystent w bunkerze — kupujesz i sprze
   for(const sx of[-.13,.13]){const ring=sph(.055,'#2a2a2a');ring.scale.set(1,1,.4);ring.position.set(sx,1.26,-.52);g.add(ring);} // okular
   const brg=sph(.02,'#2a2a2a');brg.position.set(0,1.26,-.5);g.add(brg); // mostek okularów
   const bt=box(.16,.06,.05,'#c94f4f');bt.position.set(0,.62,-.3);g.add(bt); // apaszka
-  g.scale.setScalar(1.1);g.position.set(-5,0,4.5);g.rotation.y=Math.PI/4;
+  g.scale.setScalar(1.1);const dm=vRoomDims();g.position.set(-dm.half+2,0,dm.half-2.5);g.rotation.y=Math.PI/4;
   W.bunkerIn.add(g);VG.assistG=g;
   const tag=g.children.find(c=>c.isSprite); // etykieta z nickiem — nie przebijaj terenu
   if(tag)VG.assistTag=tag;}
@@ -4014,6 +4201,7 @@ function vRaidHostTick(dt){ // host/solo: AI kosmitów
       const d=Math.hypot(px-a.x,pz-a.z);if(d<bp){bp=d;tgtP=[pid,px,pz];}}
     let tgtF=null,bf=14;
     for(const pl of VG.plants){if(pl.dmgT>0||pl.hp<3)continue;
+      if((pl.floor||0)>0)continue; // kosmici nie schodzą na niższe piętra
       if((pl.inB===true)!==a.inIn)continue; // rośliny tylko na swoim poziomie
       const d=Math.hypot(pl.x-a.x,pl.z-a.z);if(d<bf){bf=d;tgtF=pl;}}
     let mvx=0,mvz=0,spd=3.2*dt;
@@ -4067,7 +4255,7 @@ function vAim(){
   const lab=hit.object.parent&&hit.object.parent.userData&&hit.object.parent.userData.lab?hit.object.parent:null;
   const boxHit=VG.boxes.find(b=>hit.object===b.mesh||(hit.object.parent&&hit.object.parent===b.mesh))||null;
   return{block:VG.blocks.find(b=>b.mesh===hit.object)||null,bunker,lab,box:boxHit,grass:hit.object===W.grass,
-    inB:!!(hit.object.userData&&hit.object.userData.inB),hx:hit.point.x,hy:hit.point.y,hz:hit.point.z,
+    inB:!!(hit.object.userData&&hit.object.userData.inB),noSeed:!!(hit.object.userData&&hit.object.userData.noSeed),hx:hit.point.x,hy:hit.point.y,hz:hit.point.z,
     x:hit.point.x,z:hit.point.z,
     ix:Math.round(q.x),iy:hit.object===W.grass?0:Math.max(0,Math.floor(q.y)),iz:Math.round(q.z)};}
 function vFindPunchTarget(){ // najbliższy gracz przed nami (wioska)
@@ -4117,6 +4305,24 @@ function vCanPlace(ix,iy,iz){
   $('#vPauseX').onclick=()=>{AU.click();closePause(true);};
   $('#labX').onclick=()=>{AU.click();closeShop(true);};
   $('#labCraft').onclick=()=>{AU.click();craftLab();};
+  $('#vElevX').onclick=()=>{AU.click();closeShop(true);};
+  $('#vAdvX').onclick=()=>{AU.click();closeShop(true);};
+  $('#vAdvTabS').onclick=()=>{AU.click();VG.advTab='sub';renderAdv();};
+  $('#vAdvTabG').onclick=()=>{AU.click();VG.advTab='seed';renderAdv();};
+  $('#vAdvOv').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.advsub){advCraftSub();return;}
+    if(b.dataset.mut){advMutate(b.dataset.mut);return;}});
+  $('#vElevBtns').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.buy4){ // 🧪 zakup najniższego piętra z laboratorium
+      const c=10000000;
+      if(VG.money<c){toast('💰 '+T('Za mało — laboratorium kosztuje $10M','Not enough — the lab costs $10M'),'bad');return;}
+      vMoneyDelta(-c);VG.floor4=true;AU.fanfare();
+      toast('🧪 '+T('Piętro odblokowane — zaawansowane laboratorium! Kapsuła = E','Floor unlocked — advanced laboratory! The capsule = E'),'good');
+      vBuildInterior(W);vnetAct({a:'floor4'});saveVillage();renderElev();return;}
+    const fl=+b.dataset.fl;const p=VG.p;
+    if(p&&p.inside&&fl>=0&&fl<vFloorCount()){p.y=vFloorY(fl);p.vy=0;AU.pass();
+      toast('🛗 '+T('Piętro ','Floor ')+fl,'');}
+    closeShop(true);});
   $('#vPauseOpt').onclick=()=>{AU.click();vPauseView('opt');};
   $('#vPausePl').onclick=()=>{AU.click();vPauseView('pl');};
   $('#vPauseOptBack').onclick=()=>{AU.click();vPauseView('root');};
@@ -4239,10 +4445,11 @@ function vCanPlace(ix,iy,iz){
     if(ITEMS[h].seed){
       if(VG.p.inside){ // sadzenie w bunkerze
         if(!aim||!aim.inB){toast(T('Sadź na glebie w bunkerze','Plant on the bunker soil'));return;}
+        if(aim.noSeed){toast('🚫 '+T('W tej części nie sadzisz — ziemia jest w pozostałych pokojach','No planting in this part — soil is in the other rooms'),'bad');return;}
         const px=aim.hx,pz=aim.hz;
-        if(VG.plants.some(q=>q.inB&&Math.hypot(q.x-px,q.z-pz)<1.3)){toast(T('Za blisko innej rośliny','Too close to another plant'),'bad');return;}
-        const sd=SEEDS[h];VG.inv[h]--;vNewPlant(px,pz,h,'seed',sd.grow,sd.ft,0,true);AU.pass();saveVillage();
-        vnetAct({a:'plantAdd',x:px,z:pz,k:h,in:1});return;}
+        if(VG.plants.some(q=>q.inB&&(q.floor||0)===vFloorOf(VG.p.y)&&Math.hypot(q.x-px,q.z-pz)<1.3)){toast(T('Za blisko innej rośliny','Too close to another plant'),'bad');return;}
+        const sd=SEEDS[h];VG.inv[h]--;vNewPlant(px,pz,h,'seed',sd.grow,sd.ft,0,true,vFloorOf(VG.p.y));AU.pass();saveVillage();
+        vnetAct({a:'plantAdd',x:px,z:pz,k:h,in:1,fl:vFloorOf(VG.p.y)});return;}
       const onD=aim.block&&aim.block.t==='dirt';
       if(!aim.grass&&!onD){toast(T('Nasiona sadzi się na trawie lub lepszej ziemi','Seeds go on grass or better dirt'));return;}
       const px=onD?aim.block.x:aim.x,pz=onD?aim.block.z:aim.z;
@@ -4356,8 +4563,9 @@ function villStep(){ // fizyka wioski na zegaru (Worker) — działa też gdy ok
   // rośliny
   const rate=1+.25*VG.up.fert;
   const inV=!!(VG.p&&VG.p.inside); // etykiety pod ziemią nie przebijają terenu
+  const inFl=inV?vFloorOf(p.y):-1;
   for(const pl of VG.plants){const sd=SEEDS[pl.k];
-    pl.lab.visible=!pl.inB||inV;
+    pl.lab.visible=!pl.inB||inFl===(pl.floor||0);
     if(pl.dmgT>0){ // roślina uszkodzona przez kosmitów — odrasta
       pl.dmgT-=dt;pl.body.visible=false;
       pl.lab.userData.set('🔧 '+Math.ceil(pl.dmgT)+'s','#ffd60a');
@@ -4376,6 +4584,8 @@ function villStep(){ // fizyka wioski na zegaru (Worker) — działa też gdy ok
     if(f.mesh&&!f.mesh.visible){f.t-=dt;if(f.t<=0)f.mesh.visible=true;}}
   for(const c of W.carrots||[]){ // 🥕 marchewki odrastają po zjedzeniu
     if(c.mesh&&!c.mesh.visible){c.t-=dt;if(c.t<=0)c.mesh.visible=true;}}
+  for(const bt of W.bottles||[]){ // 🧴 butelki odrastają co 400 s (cicho)
+    if(bt.mesh&&!bt.mesh.visible){bt.t-=dt;if(bt.t<=0)bt.mesh.visible=true;}}
   for(const b of VG.boxes)b.lab.visible=!b.inB||inV; // 📦 etykiety skrzynek tylko pod ziemią gdy jesteś w środku
   vWorkTick(dt); // 🐇 pracownik królik (każdy gracz ma swojego)
   vSwordCheck(dt);
@@ -4484,7 +4694,11 @@ function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
     if(!msg&&!p.park&&!p.inside&&vNearHatch())msg='E — '+T('wejdź do bunkra','enter your bunker');
     if(!msg&&p.park)msg='🧗 '+T('Parkour! Karta i miecz na końcu','Parkour! Card and sword at the end');
     if(!msg&&p.inside&&VG.assistG&&Math.hypot(p.x-VG.assistG.position.x,p.z-VG.assistG.position.z)<3.8)msg='[E] '+T('Porozmawiaj z Asystentem','Talk to the Assistant');
-    if(!msg&&p.inside)msg='🚪 '+T('E w rogu — wyjście · sadź nasiona na glebie','E at the corner — exit · plant seeds on the soil');
+    if(!msg&&vNearCapsule())msg='E — 🧪 '+T('kapsuła laboratorium: substancje i mutacje nasion','lab capsule: substances and seed mutations');
+    if(!msg&&p.inside){const{half}=vRoomDims();const fl=vFloorOf(p.y);
+      if(W.elevPos&&Math.hypot(p.x-W.elevPos.x,p.z-W.elevPos.z)<1.8&&Math.abs(p.y-vFloorY(fl))<2)msg='E — 🛗 winda · '+T('wybierz piętro','choose a floor');
+      else if(fl===0)msg='🚪 '+T('E w rogu — wyjście · sadź nasiona na glebie (przy wyjściu nie)','E at the corner — exit · plant on soil (not near the exit)');
+      else msg='🪜 '+T('Piętro ','Floor ')+fl+(fl===vFloorCount()-1&&VG.up.bunk>=3?(VG.floor4?T(' — 🧪 laboratorium adv',' — 🧪 adv laboratory'):T(' — puste',' — empty')):T(' — ziemia',' — soil'))+' · 🛗 '+T('winda obok','elevator nearby');}
     if(!msg&&VNET.on&&!VG.gui&&vLyingNear())msg='E/F — '+T('podnieś gracza','pick up the player');
     if(!msg&&!VG.gui&&vElderDist()<3.8)msg='[E] '+T('Porozmawiaj ze starym chomikiem','Talk to the Old Hamster');}
   if(VG.axeMsgT>0){VG.axeMsgT-=dt;msg='🪓 '+VG.axeMsgHp+'/10';} // licznik uderzeń siekiery
@@ -4498,7 +4712,7 @@ function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
 
 /* start pętli */
 frame();
-window.DBG={v:()=>VG,w:()=>W,raid:()=>RAID,hun:()=>HUN,wk:()=>VRK,net:()=>VNET,rem:()=>REMOTES,flowers:()=>(W&&W.flowers)||[],carrots:()=>(W&&W.carrots)||[],alienHit:(i,dm)=>handleVillMsg({a:'alienHit',i,by:'DBG',dm}),nearAlien:(i)=>{const a=RAID.aliens[i];if(!a||!VG.p)return null;VG.p.x=a.x+1;VG.p.z=a.z;return{x:Math.round(a.x),z:Math.round(a.z),y:Math.round(VG.p.y)};}};
+window.DBG={v:()=>VG,w:()=>W,raid:()=>RAID,hun:()=>HUN,wk:()=>VRK,net:()=>VNET,rem:()=>REMOTES,fl:()=>({count:vFloorCount(),of:vFloorOf,y:vFloorY,dims:vRoomDims()}),flowers:()=>(W&&W.flowers)||[],carrots:()=>(W&&W.carrots)||[],alienHit:(i,dm)=>handleVillMsg({a:'alienHit',i,by:'DBG',dm}),nearAlien:(i)=>{const a=RAID.aliens[i];if(!a||!VG.p)return null;VG.p.x=a.x+1;VG.p.z=a.z;return{x:Math.round(a.x),z:Math.round(a.z),y:Math.round(VG.p.y)};}};
 </script>
 </body>
 </html>
