@@ -2993,7 +2993,11 @@ function vPlantVisual(pl){
   if(SEEDS[pl.k]&&SEEDS[pl.k].mut){const gl=new THREE.Mesh(new THREE.SphereGeometry(.55,12,10),new THREE.MeshBasicMaterial({color:SEEDS[pl.k].sc,transparent:true,opacity:.15,blending:THREE.AdditiveBlending,depthWrite:false}));gl.position.y=.5;pl.body.add(gl);}pl.body.traverse(o=>{if(o.isMesh)o.castShadow=true;});}
 function vNewPlant(x,z,k,st,t,tm,f,inB,floor){
   const pl={x,z,k,st,t,tm,f,inB:!!inB,floor:floor||0,hp:3,dmgT:0,g:new THREE.Group(),body:new THREE.Group(),lab:makeLabel(),fr:[]};
-  pl.g.position.set(x,(pl.inB?vFloorY(pl.floor)+.17:vTerrainH(x,z)+(vDirtAt(x,z)?.5:0)),z);pl.g.add(pl.body);pl.g.add(pl.lab);W.group.add(pl.g);VG.plants.push(pl);vPlantVisual(pl);return pl;}
+  let py=vTerrainH(x,z);
+  if(!pl.inB){ // powierzchnia: sadź na WIERZCHNIEJ krawędzi lepszej ziemi w tym miejscu (nawet wysoko nad terenem)
+    const db=VG.blocks.filter(b=>b.t==='dirt'&&Math.abs(b.x-x)<.6&&Math.abs(b.z-z)<.6).sort((a2,b2)=>b2.bx.y-a2.bx.y)[0];
+    if(db)py=db.bx.y+.5;}
+  pl.g.position.set(x,(pl.inB?vFloorY(pl.floor)+.17:py),z);pl.g.add(pl.body);pl.g.add(pl.lab);W.group.add(pl.g);VG.plants.push(pl);vPlantVisual(pl);return pl;}
 function vRemovePlant(pl){W.group.remove(pl.g);const i=VG.plants.indexOf(pl);if(i>=0)VG.plants.splice(i,1);}
 function vSaveKey(){return 'p3d_vw_'+VG.v.id;}
 function saveVillage(){if(!VG.v)return;
@@ -3254,7 +3258,7 @@ function vAlienHitMe(dm,px,pz){ // kosmita trafia lokalnego gracza — bez knock
   p.hp=Math.max(-25,p.hp-(dm||5));p.hpT=now();
   AU.hitP();$('#hurtVig').style.opacity=.9;setTimeout(()=>{if(VG.on)$('#hurtVig').style.opacity=0;},180);
   if(!p.down&&!p.dead&&p.hp<=0){p.down=true;p.hp=0;
-    toast('😵 '+T('Powalony! Ktoś może Cię podnieść (E/F) i odnieść do dziadka','Knocked down! Someone can pick you up (E/F)'),'bad');}}
+    toast('😵 '+T('Powalony! Ktoś może Cię odrodzić (E) — wstaniesz z 20 HP','Knocked down! Someone can revive you (E) — you get up with 20 HP'),'bad');}}
 function handleVillMsg(ev){if(!ev||!ev.a)return;
   switch(ev.a){
     case 'blkAdd':if(VG.on&&!VG.blocks.some(b=>b.x===ev.x&&b.y===ev.y&&b.z===ev.z))vAddBlock(ev.bt,ev.x,ev.y,ev.z);break;
@@ -3335,6 +3339,9 @@ function handleVillMsg(ev){if(!ev||!ev.a)return;
     case 'bunkerResize':{if(!VG.on)break;for(const b of VG.bunkers)vResizeBunker(b,ev.s||bunkerSize());vBuildInterior(W);break;}
     case 'asystAdd':{if(VG.on){VG.hasAssist=true;vAssistSpawn();}break;}
     case 'advFloor4':{if(VG.on){VG.floor4=true;vBuildInterior(W);}break;}
+    case 'revive':{if(VG.on&&VNET.on&&ev.id===VNET.myId&&VG.p){
+      VG.p.carriedBy=null;VG.p.down=false;VG.p.dead=false;VG.p.hp=20;VG.p.hpT=now();AU.fanfare();
+      toast('🩹 '+T('Odrodzono Cię! Wstajesz z 20 HP','You were revived! Getting up with 20 HP'),'good');}break;}
     case 'up':{ // 🤝 wspólne ulepszenia — ktoś kupił → wszyscy dostają
       if(VG.on&&VNET.on&&ev.k&&UPG[ev.k]&&ev.by!==VNET.myId){
         const nl=Math.max(0,Math.min(UPG[ev.k].max,ev.lv||0));
@@ -3352,9 +3359,10 @@ function villageEAction(){ // E: drzewo/parkour, wyjścia, dziadek
   const p=VG.p;if(!p)return;
   if(p.down||p.dead)return;
   if(p.carriedBy){if(vElderDist()<3.8)return;return;} // nosisz: F odłóż, przy dziadku trzymaj E
-  // 🤝 podnieś leżącego gracza (E lub F) — odnieś go do dziadka i przytrzymaj E, żeby wyleczył
+  // 💉 odrodź leżącego gracza (E) — natychmiast, wstaje z 20 HP na miejscu
   if(VNET.on&&!p.carriedBy){const lid=vLyingNear();
-    if(lid){vnetAct({a:'carry',id:lid,by:VNET.myId});AU.pass();return;}}
+    if(lid){vnetAct({a:'revive',id:lid,by:VNET.myId});AU.fanfare();
+      toast('🩹 '+T('Odrodziłeś gracza! Wstał z 20 HP','You revived the player! They got up with 20 HP'),'good');return;}}
   if(p.park){ // wyjście z parkour
     if(W&&W.pkExit&&Math.hypot(p.x-W.pkExit.x,p.z-W.pkExit.z)<2){
       p.park=false;p.x=W.secretTree.x+1.5;p.z=W.secretTree.z;p.y=vTerrainH(p.x,p.z);p.vy=0;p.vx=p.vz=0;
@@ -4369,7 +4377,7 @@ function vFreeSpot(x,z,skipBlocks){
   return true;}
 function vDirtAt(x,z){return VG.blocks.some(b=>b.t==='dirt'&&Math.abs(b.x-x)<.6&&Math.abs(b.z-z)<.6);}
 function vCanPlace(ix,iy,iz){
-  if(iy>8||Math.hypot(ix,iz)>W.radial-2)return false;
+  if(iy>20||Math.hypot(ix,iz)>W.radial-2)return false;
   if(VG.blocks.some(b=>b.x===ix&&b.y===iy&&b.z===iz))return false;
   const p=VG.p;
   if(Math.abs(p.x-ix)<.9&&Math.abs(p.z-iz)<.9&&p.y<iy+1&&p.y+1.6>iy)return false;
@@ -4748,8 +4756,8 @@ function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
   if(VG.mapOpen)drawVMap(); // 🗺️ mapa (M)
   // podnoszenie/leczenie/podpowiedzi
   let msg='';
-  if(p.dead)msg='💀 '+T('Nie żyjesz — ktoś musi Cię podnieść (E/F) i odnieść do dziadka',"You're dead — someone must pick you up (E/F) and carry you to the hamster");
-  else if(p.down)msg='😵 '+T('Powalony — ktoś może Cię podnieść (E/F) i odnieść do dziadka','Knocked down — someone can pick you up (E/F) and carry you to the hamster');
+  if(p.dead)msg='💀 '+T('Nie żyjesz — ktoś może Cię odrodzić (E) — wstaniesz z 20 HP',"You're dead — someone can revive you (E) — you get up with 20 HP");
+  else if(p.down)msg='😵 '+T('Powalony — ktoś może Cię odrodzić (E) — wstaniesz z 20 HP','Knocked down — someone can revive you (E) — you get up with 20 HP');
   else if(p.carriedBy){
     msg='🤲 '+T('Nosisz gracza — F: odłóż','Carrying a player — F: put down');
     if(vElderDist()<3.8)msg='💉 '+T('Trzymaj E — dziadek wyleczy gracza','Hold E — the hamster will heal the player');
@@ -4783,7 +4791,7 @@ function villageFrame(dt){ // rysowanie (rAF) — fizyka liczy się w villStep
       if(W.elevPos&&Math.hypot(p.x-W.elevPos.x,p.z-W.elevPos.z)<1.8&&Math.abs(p.y-vFloorY(fl))<2)msg='E — 🛗 winda · '+T('wybierz piętro','choose a floor');
       else if(fl===0)msg='🚪 '+T('E w rogu — wyjście · sadź nasiona na glebie (przy wyjściu nie)','E at the corner — exit · plant on soil (not near the exit)');
       else msg='🪜 '+T('Piętro ','Floor ')+fl+(fl===vFloorCount()-1&&VG.up.bunk>=3?(VG.floor4?T(' — 🧪 laboratorium adv',' — 🧪 adv laboratory'):T(' — puste',' — empty')):T(' — ziemia',' — soil'))+' · 🛗 '+T('winda obok','elevator nearby');}
-    if(!msg&&VNET.on&&!VG.gui&&vLyingNear())msg='E/F — '+T('podnieś gracza','pick up the player');
+    if(!msg&&VNET.on&&!VG.gui&&vLyingNear())msg='E — '+T('odrodź gracza (+20 HP)','revive the player (+20 HP)')+' · F — '+T('unieś','carry');
     if(!msg&&!VG.gui&&vElderDist()<3.8)msg='[E] '+T('Porozmawiaj ze starym chomikiem','Talk to the Old Hamster');}
   if(VG.axeMsgT>0){VG.axeMsgT-=dt;msg='🪓 '+VG.axeMsgHp+'/10';} // licznik uderzeń siekiery
   if(msg!==VG.prompt){VG.prompt=msg;$('#vPrompt').textContent=msg;show($('#vPrompt'),!!msg);}
