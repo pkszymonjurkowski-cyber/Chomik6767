@@ -83,7 +83,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   #vHud.mobileVillage #vBar{bottom:138px;max-width:52vw;gap:5px}
   #vHud.mobileVillage .bSlot{width:46px;height:46px}
   #vHud.mobileVillage #vPrompt{bottom:210px;max-width:72vw;text-align:center;font-size:12px;padding:6px 10px}
+  #mLook{position:fixed;inset:0;touch-action:none;z-index:0}
   .mJoy{position:absolute;left:22px;bottom:28px;width:132px;height:132px;border-radius:50%;background:rgba(5,8,12,.5);border:1px solid rgba(255,255,255,.18);touch-action:none}
+  .mJoy,.mActions,#mInventory{z-index:1}
   .mJoy i{position:absolute;left:40px;top:40px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);pointer-events:none;transform:translate(0,0)}
   .mActions{position:absolute;right:20px;bottom:26px;width:178px;height:215px}
   .mBtn{position:absolute;width:62px;height:62px;border-radius:50%;border:1px solid rgba(255,255,255,.23);background:rgba(5,8,12,.5);color:#fff;display:flex;align-items:center;justify-content:center;touch-action:manipulation;padding:0;box-shadow:0 3px 13px rgba(0,0,0,.32)}
@@ -400,6 +402,7 @@ kbd{background:rgba(255,255,255,.15);border-radius:5px;padding:1px 7px;font-fami
   <div id="vBar"></div>
   <div id="vHudHint">WASD — ruch · Shift — sprint · C — kuca · Spacja — skok · F — podnieś/odłóż gracza / królik · T — ekwipunek · E — dziadek / drzewo / bunker · 1-9,0 — przedmiot · X — kilof · V — bunker · G — wyrzuć · M — mapa · LPM — uderz/posadź/postaw · ESC — menu</div>
   <div id="vMobile" aria-label="Sterowanie mobilne">
+    <div id="mLook" aria-label="Przeciągnij, aby obrócić kamerę"></div>
     <div class="mJoy" id="mJoy" aria-label="Joystick ruchu"><i id="mJoyKnob"></i></div>
     <button class="mBtn" id="mInventory" aria-label="Ekwipunek"><span class="mIcon">🎒</span></button>
     <div class="mActions">
@@ -2345,12 +2348,13 @@ canvas.addEventListener('click',()=>{if(!isVillageMobile()&&(G.inGame||(VG.on&&!
 // Na telefonie przeciąganie palcem po świecie obraca kamerę. Przyciski mają własne
 // nasłuchiwanie i zatrzymują zdarzenie, więc nie poruszą widokiem podczas klikania.
 let touchCamId=null,touchCamX=0,touchCamY=0;
-canvas.addEventListener('pointerdown',e=>{if(!isVillageMobile()||!VG.on||VG.gui||e.pointerType!=='touch')return;
-  touchCamId=e.pointerId;touchCamX=e.clientX;touchCamY=e.clientY;canvas.setPointerCapture(e.pointerId);e.preventDefault();});
-canvas.addEventListener('pointermove',e=>{if(e.pointerId!==touchCamId)return;
+const touchLook=$('#mLook');
+touchLook.addEventListener('pointerdown',e=>{if(!isVillageMobile()||!VG.on||VG.gui)return;
+  touchCamId=e.pointerId;touchCamX=e.clientX;touchCamY=e.clientY;touchLook.setPointerCapture(e.pointerId);e.preventDefault();});
+touchLook.addEventListener('pointermove',e=>{if(e.pointerId!==touchCamId)return;
   const dx=e.clientX-touchCamX,dy=e.clientY-touchCamY;touchCamX=e.clientX;touchCamY=e.clientY;
   const sn=.0042*OPT.sens/100;INP.yaw-=dx*sn;INP.pitch=clamp(INP.pitch-dy*sn,-1.45,1.45);e.preventDefault();});
-for(const type of['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,e=>{if(e.pointerId===touchCamId)touchCamId=null;});
+for(const type of['pointerup','pointercancel','lostpointercapture'])touchLook.addEventListener(type,e=>{if(e.pointerId===touchCamId)touchCamId=null;});
 addEventListener('mousemove',e=>{if(!pointerLocked)return;
   const sn=.0024*OPT.sens/100;INP.yaw-=e.movementX*sn;INP.pitch=clamp(INP.pitch-e.movementY*sn,-1.45,1.45);});
 addEventListener('mousedown',e=>{if(e.button===0&&pointerLocked&&G.inGame&&G.phase==='play'&&G.meAlive&&!chatOpen){
