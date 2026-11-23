@@ -68,7 +68,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 #vHudHint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font-size:12px;opacity:.6;background:rgba(14,16,22,.45);padding:6px 14px;border-radius:8px;white-space:nowrap}
 /* Sterowanie dotykowe: interfejs jest całkowicie ukryty poza telefonami. */
 #vMobile{display:none}
-@media (pointer:coarse) and (max-width:900px){
+@media (max-width:900px){
   #c3d{touch-action:none}
   /* Wszystkie okna są czytelne, ale nie zasłaniają całego widoku na telefonie. */
   .ov .panel{transform:scale(.86);transform-origin:center;max-height:96vh;overflow:auto}
@@ -733,7 +733,8 @@ let W=null;
 const REMOTES=new Map();   // id -> {grp,cur,tgt,alive,dying}
 const cl={pred:null,lastSnapT:0,frozen:false,gDir:1};
 const INP={f:0,s:0,j:false,yaw:0,pitch:0,rev:false,sprint:false,crouch:false,keys:{},touchF:0,touchS:0,touchJ:false};
-function isVillageMobile(){return matchMedia('(pointer:coarse) and (max-width:900px)').matches;}
+// Nie polegamy na `pointer: coarse`: część WebViewów Androida zgłasza tam błędną wartość.
+function isVillageMobile(){return (innerWidth<=900||screen.width<=900)&&((navigator.maxTouchPoints||0)>0||'ontouchstart' in window);}
 const STA={v:10,max:10}; // stamina sprintu: max 10 s biegu, regen 0.5/s (pełna po 20 s)
 function staTick(dt,sprinting,moving){ // zużycie 1/s przy sprincie, regen 0.5/s
   if(sprinting&&moving)STA.v=Math.max(0,STA.v-dt);
